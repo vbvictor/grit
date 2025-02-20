@@ -23,3 +23,22 @@ go.work.sum
 
 # env file
 .env
+
+# IDE
+.vscode
+.idea
+
+# Development tmp folder
+dev_data
+test_data
+plots
+
+# Test results
+test/charts
+
+# Goreleaser
+dist
+
+# Go coverage
+coverage.out
+coverage.html
