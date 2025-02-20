@@ -62,7 +62,7 @@ example.com/pkg/file1.go:10.20,30.2 3 1`,
 			err = tmpfile.Close()
 			require.NoError(t, err, "Failed to close temp file")
 
-			got, err := ReadCoverage(tmpfile.Name(), Options{Top: 10, SortBy: CoverageAsc, ExcludePath: ""})
+			got, err := ReadCoverage(tmpfile.Name(), Options{Top: 10, SortBy: Worst, ExcludePath: ""})
 
 			if tt.wantErr != nil {
 				require.ErrorIs(t, err, tt.wantErr)

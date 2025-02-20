@@ -138,11 +138,9 @@ func TestRunGocognit(t *testing.T) {
 				assert.True(t, exists, "File %s should exist", file.Path)
 
 				if exists {
-					// Check average complexity
 					assert.InDelta(t, expected.AvgComplexity, file.AvgComplexity, 0.01,
 						"File %s should have average complexity %f", file.Path, expected.AvgComplexity)
 
-					// Check functions
 					for _, fn := range file.Functions {
 						expectedFn, fnExists := expected.Functions[fn.Name]
 						assert.True(t, fnExists, "Function %s should exist", fn.Name)

@@ -98,7 +98,6 @@ func ReadGitChurn(repoPath string, opts ChurnOptions) ([]*ChurnChunk, error) {
 	fileStats := make(map[string]*ChurnChunk)
 	lines := strings.Split(string(output), "\n")
 
-	fmt.Printf("Got %d entries", len(lines))
 	processLines(lines, fileStats, opts)
 
 	return sortAndLimit(maps.Values(fileStats), opts.SortBy, opts.Top), nil

@@ -1,6 +1,7 @@
 package complexity
 
 import (
+	"fmt"
 	"path/filepath"
 	"regexp"
 
@@ -9,15 +10,17 @@ import (
 
 func RunGocyclo(repoPath string, opts Options) ([]*FileStat, error) {
 	var excludeRegex *regexp.Regexp
-	if opts.Exclude != "" {
-		// excludeRegex, err := regexp.Compile(opts.Exclude)
-		// if err != nil {
-		// return nil, fmt.Errorf("invalid exclude pattern: %w", err)
-		// }
+
+	if opts.ExcludePath != "" {
+		var err error
+
+		excludeRegex, err = regexp.Compile(opts.ExcludePath)
+		if err != nil {
+			return nil, fmt.Errorf("invalid exclude pattern: %w", err)
+		}
 	}
 
 	paths := []string{repoPath}
-	// Use gocyclo's built-in ignore functionality
 	stats := gocyclo.Analyze(paths, excludeRegex)
 
 	result := make([]*FileStat, 0)

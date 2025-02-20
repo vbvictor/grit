@@ -47,6 +47,34 @@ const (
 	DefaultTop          = 10
 )
 
+const (
+	LongSort         = "sort"
+	LongTop          = "top"
+	LongVerbose      = "verbose"
+	LongExclude      = "exclude"
+	LongExtensions   = "ext"
+	LongSince        = "since"
+	LongUntil        = "until"
+	LongFormat       = "format"
+	LongEngine       = "engine"
+	LongRunCoverage  = "run"
+	LongFileCoverage = "file"
+
+	// Flag shortcuts.
+	ShortTop          = "t"
+	ShortVerbose      = "v"
+	ShortExt          = "e"
+	ShortSince        = "s"
+	ShortUntil        = "u"
+	ShortFormat       = "f"
+	ShortEngine       = "g"
+	ShortRunCoverage  = "r"
+	ShortFileCoverage = "f"
+
+	DefaultUntil = "current date"
+	DefaultSince = "one year ago"
+)
+
 func GetExtMap(extensions []string) map[string]struct{} {
 	extMap := make(map[string]struct{})
 

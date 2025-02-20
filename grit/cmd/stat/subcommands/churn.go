@@ -12,8 +12,8 @@ import (
 )
 
 var ChurnCmd = &cobra.Command{
-	Use:   "churn <repository>",
-	Short: "Get churn metrics of a repository",
+	Use:   "churn <path>",
+	Short: "Show files that have the most changes in repository",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(_ *cobra.Command, args []string) error {
 		repoPath, err := filepath.Abs(args[0])
@@ -25,7 +25,7 @@ var ChurnCmd = &cobra.Command{
 			fmt.Printf("Processing repository: %s\n", repoPath)
 		}
 
-		opts, err := createOptsFromFlags()
+		opts, err := churnOptsFromFlags()
 		if err != nil {
 			return fmt.Errorf("failed to create options: %w", err)
 		}
@@ -38,23 +38,23 @@ var ChurnCmd = &cobra.Command{
 func init() {
 	flags := ChurnCmd.PersistentFlags()
 
-	flags.StringVar(&flag.SortBy, "sort", "commits",
+	flags.StringVar(&flag.SortBy, flag.LongSort, "commits",
 		fmt.Sprintf("Sort by: %s, %s, %s, %s", git.Changes, git.Additions, git.Deletions, git.Commits))
-	flags.IntVarP(&flag.Top, "top", "t", git.DefaultTop, "Number of top files to display")
-	flags.BoolVarP(&flag.Verbose, "verbose", "v", false, "Show detailed progress")
-	flags.StringVar(&flag.ExcludePath, "exclude", "", "Exclude files matching regex pattern")
-	flags.StringSliceVarP(&flag.Extensions, "ext", "e", nil,
+	flags.IntVarP(&flag.Top, flag.LongTop, flag.ShortTop, git.DefaultTop, "Number of top files to display")
+	flags.BoolVarP(&flag.Verbose, flag.LongVerbose, flag.ShortVerbose, false, "Show detailed progress")
+	flags.StringVar(&flag.ExcludePath, flag.LongExclude, "", "Exclude files matching regex pattern")
+	flags.StringSliceVarP(&flag.Extensions, flag.LongExtensions, flag.ShortExt, nil,
 		"Only include files with given extensions in comma-separated list. For example go,h,c")
-	flags.StringVarP(&flag.Since, "since", "s", "", "Start date for analysis (YYYY-MM-DD)")
-	flags.StringVarP(&flag.Until, "until", "u", "", "End date for analysis (YYYY-MM-DD)")
-	flags.StringVarP(&flag.OutputFormat, "format", "f", flag.Tabular,
+	flags.StringVarP(&flag.Since, flag.LongSince, flag.ShortSince, "", "Start date for analysis (YYYY-MM-DD)")
+	flags.StringVarP(&flag.Until, flag.LongUntil, flag.ShortUntil, "", "End date for analysis (YYYY-MM-DD)")
+	flags.StringVarP(&flag.OutputFormat, flag.LongFormat, flag.ShortFormat, flag.Tabular,
 		fmt.Sprintf("Output format [%s]", strings.Join(flag.AvailableOutputFormats, ", ")))
 
-	ChurnCmd.Flag("until").DefValue = "current date"
-	ChurnCmd.Flag("since").DefValue = "one year ago"
+	ChurnCmd.Flag(flag.LongUntil).DefValue = flag.DefaultUntil
+	ChurnCmd.Flag(flag.LongSince).DefValue = flag.DefaultSince
 }
 
-func createOptsFromFlags() (git.ChurnOptions, error) {
+func churnOptsFromFlags() (git.ChurnOptions, error) {
 	opts := git.ChurnOptions{}
 
 	opts.SortBy = flag.SortBy

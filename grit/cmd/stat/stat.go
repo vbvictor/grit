@@ -11,7 +11,8 @@ var StatCmd = &cobra.Command{
 	Long:  `Some long stat description.`,
 }
 
-func init() { //nolint
+func init() {
 	StatCmd.AddCommand(stat.ChurnCmd)
 	StatCmd.AddCommand(stat.ComplexityCmd)
+	StatCmd.AddCommand(stat.CoverageCmd)
 }

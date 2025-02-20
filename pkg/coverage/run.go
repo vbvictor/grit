@@ -21,20 +21,21 @@ const (
 type SortType = string
 
 var (
-	CoverageAsc  SortType = "asc"
-	CoverageDesc SortType = "desc"
+	Worst SortType = "worst"
+	Best  SortType = "best"
 )
+
+type FileCoverage struct {
+	File       string
+	Coverage   float64
+	Statements int
+	Covered    int
+}
 
 type Options struct {
 	SortBy      SortType
 	Top         int
 	ExcludePath string
-}
-
-var CoverageOpts = Options{
-	SortBy:      CoverageAsc,
-	Top:         defaultTop,
-	ExcludePath: "",
 }
 
 func ReadCoverage(coverageFile string, opts Options) ([]*FileCoverage, error) {
@@ -82,9 +83,9 @@ func ReadCoverage(coverageFile string, opts Options) ([]*FileCoverage, error) {
 func sortAndLimit(result []*FileCoverage, sortBy SortType, limit int) {
 	less := func() func(i, j int) bool {
 		switch sortBy {
-		case CoverageAsc:
+		case Worst:
 			return func(i, j int) bool { return result[i].Coverage > result[j].Coverage }
-		case CoverageDesc:
+		case Best:
 			return func(i, j int) bool { return result[i].Coverage > result[j].Coverage }
 		default:
 			return nil
