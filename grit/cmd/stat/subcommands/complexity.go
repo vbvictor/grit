@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"slices"
 
 	"github.com/spf13/cobra"
 	"github.com/vbvictor/grit/grit/cmd/flag"
@@ -26,7 +25,7 @@ var ComplexityCmd = &cobra.Command{
 			fmt.Printf("Processing repository: %s\n", repoPath)
 		}
 
-		opts, err := complexityOptsFromFlags()
+		opts, err := ComplexityOptsFromFlags()
 		if err != nil {
 			return fmt.Errorf("failed to create options: %w", err)
 		}
@@ -36,7 +35,7 @@ var ComplexityCmd = &cobra.Command{
 			return fmt.Errorf("error running complexity analysis: %w", err)
 		}
 
-		fileStat = sortAndLimit(fileStat, opts)
+		fileStat = complexity.SortAndLimit(fileStat, opts)
 
 		complexity.PrintTabular(fileStat, os.Stdout)
 
@@ -54,7 +53,7 @@ func init() {
 	flags.StringVar(&flag.ExcludePath, flag.LongExclude, "", "Exclude files matching regex pattern")
 }
 
-func complexityOptsFromFlags() (complexity.Options, error) { //nolint:unparam // May be used in the future
+func ComplexityOptsFromFlags() (complexity.Options, error) { //nolint:unparam // error for future use
 	opts := complexity.Options{}
 
 	opts.Top = flag.Top
@@ -62,24 +61,4 @@ func complexityOptsFromFlags() (complexity.Options, error) { //nolint:unparam //
 	opts.Engine = flag.Engine
 
 	return opts, nil
-}
-
-func sortAndLimit(fileStat []*complexity.FileStat, opts complexity.Options) []*complexity.FileStat {
-	slices.SortFunc(fileStat, func(a, b *complexity.FileStat) int {
-		if b.AvgComplexity > a.AvgComplexity {
-			return 1
-		}
-
-		if b.AvgComplexity < a.AvgComplexity {
-			return -1
-		}
-
-		return 0
-	})
-
-	if opts.Top > 0 && opts.Top < len(fileStat) {
-		return fileStat[:opts.Top]
-	}
-
-	return fileStat
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/vbvictor/grit/grit/cmd/flag"
 	"github.com/vbvictor/grit/grit/cmd/plot"
+	"github.com/vbvictor/grit/grit/cmd/report"
 	"github.com/vbvictor/grit/grit/cmd/stat"
 )
 
@@ -37,4 +38,5 @@ func Execute() {
 func init() {
 	gritCmd.AddCommand(plot.PlotCmd)
 	gritCmd.AddCommand(stat.StatCmd)
+	gritCmd.AddCommand(report.ReportCmd)
 }

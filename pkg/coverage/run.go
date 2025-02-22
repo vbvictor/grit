@@ -4,10 +4,13 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"sort"
 
+	"github.com/vbvictor/grit/grit/cmd/flag"
 	"golang.org/x/tools/cover"
 )
 
@@ -75,16 +78,14 @@ func ReadCoverage(coverageFile string, opts Options) ([]*FileCoverage, error) {
 		})
 	}
 
-	sortAndLimit(results, opts.SortBy, opts.Top)
-
 	return results, nil
 }
 
-func sortAndLimit(result []*FileCoverage, sortBy SortType, limit int) {
+func SortAndLimit(result []*FileCoverage, sortBy SortType, limit int) []*FileCoverage {
 	less := func() func(i, j int) bool {
 		switch sortBy {
 		case Worst:
-			return func(i, j int) bool { return result[i].Coverage > result[j].Coverage }
+			return func(i, j int) bool { return result[i].Coverage < result[j].Coverage }
 		case Best:
 			return func(i, j int) bool { return result[i].Coverage > result[j].Coverage }
 		default:
@@ -95,17 +96,26 @@ func sortAndLimit(result []*FileCoverage, sortBy SortType, limit int) {
 	sort.Slice(result, less)
 
 	if limit >= 0 && len(result) > limit {
-		result = result[:limit]
+		return result[:limit]
 	}
+
+	return result
 }
 
 func RunCoverage(repoPath, coverageFile string) error {
 	coverageArg := filepath.Join(repoPath, "...")
 	cmd := exec.Command("go", "test", coverageArg, "-coverprofile="+coverageFile)
 
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
+	flag.LogIfVerbose("Running command: %s\n", cmd.String())
+
+	var stderr bytes.Buffer
+
+	if flag.Verbose {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = io.MultiWriter(os.Stderr, &stderr)
+	} else {
+		cmd.Stderr = &stderr
+	}
 
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to run tests: %w\nstderr: %s", err, stderr.String())

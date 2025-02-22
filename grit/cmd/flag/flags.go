@@ -1,5 +1,7 @@
 package flag
 
+import "fmt"
+
 // Global flags used across all commands
 
 type OutputType = string
@@ -28,13 +30,18 @@ var (
 	ChurnFactor      float64
 	ComplexityFactor float64
 	CoverageFactor   float64
-	RunCoverage      bool
+	RunCoverage      string
 	CoverageFile     string
 
 	// Output format flags.
 	JSON                   OutputType = "json"
 	Tabular                OutputType = "tabular"
 	AvailableOutputFormats            = []OutputType{JSON, Tabular}
+
+	// Coverage Run formats
+	Always = "always"
+	Never  = "never"
+	Auto   = "auto"
 
 	OutputFormat OutputType
 )
@@ -58,7 +65,7 @@ const (
 	LongFormat       = "format"
 	LongEngine       = "engine"
 	LongRunCoverage  = "run"
-	LongFileCoverage = "file"
+	LongFileCoverage = "coverage"
 
 	// Flag shortcuts.
 	ShortTop          = "t"
@@ -69,7 +76,7 @@ const (
 	ShortFormat       = "f"
 	ShortEngine       = "g"
 	ShortRunCoverage  = "r"
-	ShortFileCoverage = "f"
+	ShortFileCoverage = "c"
 
 	DefaultUntil = "current date"
 	DefaultSince = "one year ago"
@@ -83,4 +90,10 @@ func GetExtMap(extensions []string) map[string]struct{} {
 	}
 
 	return extMap
+}
+
+func LogIfVerbose(format string, args ...any) {
+	if Verbose {
+		fmt.Printf(format, args...)
+	}
 }

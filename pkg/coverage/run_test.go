@@ -75,10 +75,7 @@ example.com/pkg/file1.go:10.20,30.2 3 1`,
 			require.Equal(t, len(tt.want), len(got), "Results length mismatch")
 
 			for i, want := range tt.want {
-				assert.Equal(t, want.File, got[i].File, "File path mismatch")
-				assert.InDelta(t, want.Coverage, got[i].Coverage, 0.01, "Coverage percentage mismatch")
-				assert.Equal(t, want.Statements, got[i].Statements, "Total statements mismatch")
-				assert.Equal(t, want.Covered, got[i].Covered, "Covered statements mismatch")
+				assert.Contains(t, got, want, "Result mismatch at index %d", i)
 			}
 		})
 	}

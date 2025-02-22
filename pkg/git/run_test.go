@@ -2,6 +2,7 @@ package git
 
 import (
 	"os/exec"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -45,7 +46,7 @@ func TestSortAndLimitTypes(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := sortAndLimit(testData, tt.sortBy, 10)
+			result := SortAndLimit(testData, tt.sortBy, 10)
 
 			actual := extractFileNames(result)
 			assert.Equal(t, tt.expected, actual)
@@ -92,7 +93,7 @@ func TestSortAndLimitLimits(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := sortAndLimit(testData, Commits, tt.limit)
+			result := SortAndLimit(testData, Commits, tt.limit)
 
 			actual := extractFileNames(result)
 			assert.Equal(t, tt.expected, actual)
@@ -132,7 +133,7 @@ func TestSortAndLimitFiles(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := sortAndLimit(tt.input, Commits, 10)
+			result := SortAndLimit(tt.input, Commits, 10)
 
 			actual := extractFileNames(result)
 			assert.Equal(t, tt.expected, actual)
@@ -158,62 +159,32 @@ func assertSorted(t *testing.T, result []*ChurnChunk, ext func(*ChurnChunk) any)
 
 // TODO: add more data to bundle.
 func TestReadChurn(t *testing.T) {
-	tmpDir := t.TempDir()
-
-	Unbundle(t, "../../test/bundles/churn-test.bundle", tmpDir)
-
 	for _, tt := range []struct {
 		name     string
-		sortBy   SortType
-		top      int
+		bundle   string
 		expected []*ChurnChunk
 	}{
 		{
-			name:   "sort by changes top 2",
-			sortBy: Changes,
-			top:    2,
+			name:   "simple",
+			bundle: filepath.Join("..", "..", "test", "bundles", "churn-test.bundle"),
 			expected: []*ChurnChunk{
 				{File: "main.cpp", Added: 15, Removed: 8, Churn: 23, Commits: 4},
 				{File: "main.go", Added: 7, Removed: 0, Churn: 7, Commits: 1},
-			},
-		},
-		{
-			name:   "sort by additions",
-			sortBy: Additions,
-			top:    2,
-			expected: []*ChurnChunk{
-				{File: "main.cpp", Added: 15, Removed: 8, Churn: 23, Commits: 4},
-				{File: "main.go", Added: 7, Removed: 0, Churn: 7, Commits: 1},
-			},
-		},
-		{
-			name:   "sort by deletions",
-			sortBy: Deletions,
-			top:    1,
-			expected: []*ChurnChunk{
-				{File: "main.cpp", Added: 15, Removed: 8, Churn: 23, Commits: 4},
-			},
-		},
-		{
-			name:   "sort by commits",
-			sortBy: Commits,
-			top:    1,
-			expected: []*ChurnChunk{
-				{File: "main.cpp", Added: 15, Removed: 8, Churn: 23, Commits: 4},
+				{File: "Readme.md", Added: 3, Removed: 0, Churn: 3, Commits: 0},
 			},
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			results, err := ReadGitChurn(tmpDir, ChurnOptions{SortBy: tt.sortBy, Top: tt.top})
+			tmpDir := t.TempDir()
+
+			Unbundle(t, tt.bundle, tmpDir)
+
+			results, err := ReadGitChurn(tmpDir, ChurnOptions{})
 			require.NoError(t, err)
 			assert.Len(t, results, len(tt.expected))
 
-			for i, exp := range tt.expected {
-				assert.Equal(t, exp.File, results[i].File)
-				assert.Equal(t, exp.Added, results[i].Added)
-				assert.Equal(t, exp.Removed, results[i].Removed)
-				assert.Equal(t, exp.Churn, results[i].Churn)
-				assert.Equal(t, exp.Commits, results[i].Commits)
+			for _, exp := range tt.expected {
+				assert.Contains(t, results, exp)
 			}
 		})
 	}

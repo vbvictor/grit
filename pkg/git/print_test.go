@@ -4,9 +4,6 @@ import (
 	"bytes"
 	"strings"
 	"testing"
-	"time"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestPrintTable(t *testing.T) {
@@ -82,60 +79,4 @@ func TestPrintTable(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestPrintJSON(t *testing.T) {
-	var buf bytes.Buffer
-
-	results := []*ChurnChunk{
-		{
-			File:    "main.go",
-			Churn:   10,
-			Added:   5,
-			Removed: 5,
-			Commits: 2,
-		},
-	}
-
-	since, _ := time.Parse(time.DateOnly, "2024-01-01")
-	until, _ := time.Parse(time.DateOnly, "2024-01-31")
-
-	opts := ChurnOptions{
-		Top:         1,
-		SortBy:      "churn",
-		Path:        "src/",
-		ExcludePath: "vendor/",
-		Extensions:  map[string]struct{}{"go": {}},
-		Since:       since,
-		Until:       until,
-	}
-
-	printJSON(results, &buf, opts)
-
-	expected := `{
-  "metadata": {
-    "totalFiles": 1,
-    "sortBy": "churn",
-    "filters": {
-      "path": "src/",
-      "excludePattern": "vendor/",
-      "extensions": "go",
-      "dateRange": {
-        "since": "2024-01-01",
-        "until": "2024-01-31"
-      }
-    }
-  },
-  "files": [
-    {
-      "path": "main.go",
-      "changes": 10,
-      "additions": 5,
-      "deletions": 5,
-      "commits": 2
-    }
-  ]
-}
-`
-	assert.JSONEq(t, expected, buf.String())
 }

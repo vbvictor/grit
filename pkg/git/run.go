@@ -2,7 +2,6 @@ package git
 
 import (
 	"fmt"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
@@ -67,26 +66,6 @@ type ChurnOptions struct {
 	OutputFormat flag.OutputType
 }
 
-// var ChurnOpts = ChurnOptions{
-// 	SortBy:       Changes,
-// 	Top:          DefaultTop,
-// 	Path:         "",
-// 	ExcludePath:  "",
-// 	Extensions:   nil,
-// 	Since:        Date{},
-// 	Until:        Date{},
-// 	OutputFormat: flag.Tabular,
-// }
-
-func PrintRepoStats(repoPath string, opts ChurnOptions) error {
-	churns, err := ReadGitChurn(repoPath, opts)
-	if err != nil {
-		return fmt.Errorf("error getting churn metrics: %w", err)
-	}
-
-	return printStats(churns, os.Stdout, opts)
-}
-
 func ReadGitChurn(repoPath string, opts ChurnOptions) ([]*ChurnChunk, error) {
 	cmd := buildGitCommand(repoPath, opts)
 
@@ -100,7 +79,7 @@ func ReadGitChurn(repoPath string, opts ChurnOptions) ([]*ChurnChunk, error) {
 
 	processLines(lines, fileStats, opts)
 
-	return sortAndLimit(maps.Values(fileStats), opts.SortBy, opts.Top), nil
+	return maps.Values(fileStats), nil
 }
 
 func buildGitCommand(repoPath string, opts ChurnOptions) []string {
@@ -218,7 +197,7 @@ func shouldSkipFile(file string, opts ChurnOptions) bool {
 	return false
 }
 
-func sortAndLimit(result []*ChurnChunk, sortBy SortType, limit int) []*ChurnChunk {
+func SortAndLimit(result []*ChurnChunk, sortBy SortType, limit int) []*ChurnChunk {
 	less := func() func(i, j int) bool {
 		switch sortBy {
 		case Changes:

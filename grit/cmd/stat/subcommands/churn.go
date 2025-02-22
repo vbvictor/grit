@@ -2,8 +2,8 @@ package stat
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -25,13 +25,20 @@ var ChurnCmd = &cobra.Command{
 			fmt.Printf("Processing repository: %s\n", repoPath)
 		}
 
-		opts, err := churnOptsFromFlags()
+		opts, err := ChurnOptsFromFlags()
 		if err != nil {
 			return fmt.Errorf("failed to create options: %w", err)
 		}
 		opts.Path = repoPath
 
-		return git.PrintRepoStats(repoPath, opts)
+		churns, err := git.ReadGitChurn(repoPath, opts)
+		if err != nil {
+			return fmt.Errorf("error getting churn metrics: %w", err)
+		}
+
+		churns = git.SortAndLimit(churns, opts.SortBy, opts.Top)
+
+		return git.PrintStats(churns, os.Stdout, opts)
 	},
 }
 
@@ -47,14 +54,12 @@ func init() {
 		"Only include files with given extensions in comma-separated list. For example go,h,c")
 	flags.StringVarP(&flag.Since, flag.LongSince, flag.ShortSince, "", "Start date for analysis (YYYY-MM-DD)")
 	flags.StringVarP(&flag.Until, flag.LongUntil, flag.ShortUntil, "", "End date for analysis (YYYY-MM-DD)")
-	flags.StringVarP(&flag.OutputFormat, flag.LongFormat, flag.ShortFormat, flag.Tabular,
-		fmt.Sprintf("Output format [%s]", strings.Join(flag.AvailableOutputFormats, ", ")))
 
 	ChurnCmd.Flag(flag.LongUntil).DefValue = flag.DefaultUntil
 	ChurnCmd.Flag(flag.LongSince).DefValue = flag.DefaultSince
 }
 
-func churnOptsFromFlags() (git.ChurnOptions, error) {
+func ChurnOptsFromFlags() (git.ChurnOptions, error) {
 	opts := git.ChurnOptions{}
 
 	opts.SortBy = flag.SortBy
