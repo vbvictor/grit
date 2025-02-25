@@ -66,6 +66,14 @@ type ChurnOptions struct {
 	OutputFormat flag.OutputType
 }
 
+type ChurnChunk struct {
+	File    string `json:"path"`
+	Churn   int    `json:"changes"`
+	Added   int    `json:"additions"`
+	Removed int    `json:"deletions"`
+	Commits int    `json:"commits"`
+}
+
 func ReadGitChurn(repoPath string, opts ChurnOptions) ([]*ChurnChunk, error) {
 	cmd := buildGitCommand(repoPath, opts)
 
