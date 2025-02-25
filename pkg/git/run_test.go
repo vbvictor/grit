@@ -166,7 +166,7 @@ func TestReadChurn(t *testing.T) {
 	}{
 		{
 			name:   "simple",
-			bundle: filepath.Join("..", "..", "test", "bundles", "churn-test.bundle"),
+			bundle: filepath.Join("..", "..", "testdata", "bundles", "churn-test.bundle"),
 			expected: []*ChurnChunk{
 				{File: "main.cpp", Added: 15, Removed: 8, Churn: 23, Commits: 4},
 				{File: "main.go", Added: 7, Removed: 0, Churn: 7, Commits: 1},
