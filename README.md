@@ -1,39 +1,52 @@
 # Go Refactoring Insight Tool
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)]()
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-GRIT helps developers understand their codebase maintainability through key metrics including code churn, complexity, and test coverage.
-WUse these insights to make data-driven decisions about refactoring and testing priorities.
+GRIT is a cli tool that helps developers understand their codebase
+maintainability index through key metrics: code churn, code complexity and test
+coverage. Use calculated maintainability index to make decisions about
+refactoring and testing priorities.
 
-## What It Measures
+## Table of contents
 
-- **Code Churn**: Tracks how frequently files change over time
-- **Code Complexity**: Calculates cyclomatic complexity metrics
-- **Test Coverage**: Analyzes test coverage percentage per file
-- **Maintainability Score**: Combines metrics to rate maintainability
-- **Visual Analytics**: Generates churn vs complexity graphs
+- [Go Refactoring Insight Tool](#go-refactoring-insight-tool)
+  - [Table of contents](#table-of-contents)
+  - [What GRIT Measures](#what-grit-measures)
+  - [Getting Started](#getting-started)
+  - [Usage](#usage)
+    - [Help command](#help-command)
+  - [Roadmap](#roadmap)
+  - [Contributing](#contributing)
+  - [License](#license)
 
-## Key Features
+## What GRIT Measures
 
-- **Metrics**
-  - Churn by file
-  - Complexity by file
-  - Code coverage by file
-- Reports
-  - Generate maintainability report
-  - Generate churn vs complexity graph
+<!-- - **Maintainability Score**: Combines metrics to rate maintainability index-->
+<!-- - **Visual Analytics**: Generates churn vs complexity graphs -->
+- **Code Churn**: Track how frequently files change over time
+- **Code Complexity**: Calculate cyclomatic complexity metric per file
+- **Test Coverage**: Analyze test coverage percentage per file
 
+All of these metrics are useful when making decisions about:
+
+- Best candidates for refactoring efforts
+- What most complex files to cover with unit tests first
+
+<!-- These metrics if measured regularly can address appearing maintainability issues in a large codebase. -->
+  
 ## Getting Started
 
-Install via `go`:
+Install via tool via `go install` command:
 
 ```bash
-go install  github.com/vbvictor/grit@latest
+go install github.com/vbvictor/grit@latest
 ```
+
+Or Download the latest binary release from [Github Releases](https://github.com/vbvictor/grit/releases) page.
 
 ## Usage
 
-### Help commands
+### Help command
 
 Run `grit -h` to check out all available commands:
 
@@ -51,12 +64,6 @@ Flags:
   -h, --help   help for grit
 ```
 
-## Examples
-
-```bash
-grit stat complexity
-```
-
 ## Roadmap
 
 - Features
@@ -65,8 +72,9 @@ grit stat complexity
   - [ ] render churn vs complexity graph
   - [ ] render churn vs complexity vs coverage graph
   - [ ] add more output formats
-  - [ ] support custom user-files with metrics for supporting languages
+  - [ ] support custom files with metrics to supporting other languages
 - Improvements
+  - [ ] enhance readme with more examples and metric descriptions
   - [ ] use different library for formatting tabular output
 
 ## Contributing
