@@ -268,8 +268,8 @@ func createTestChart(t *testing.T, entries []ScatterEntry, outputPath string) {
 }
 
 var (
-	CSVDataDir = "../../test/data/"
-	OutputDir  = "../../test/charts/"
+	CSVDataDir = "../../testdata/data/"
+	OutputDir  = "../../testdata/charts/"
 )
 
 func TestCreateScatterCharts(t *testing.T) {

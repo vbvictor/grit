@@ -34,7 +34,7 @@ test_data
 plots
 
 # Test results
-test/charts
+testdata/charts
 
 # Goreleaser
 dist

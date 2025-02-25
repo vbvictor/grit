@@ -1,9 +1,12 @@
 .PHONY: all build test clean lint vet fmt run
 
-all: lint test build
+all: build lint test
+
+grit:
+	go build -o grit ./grit
 
 build:
-	go build ./grit
+	go build ./...
 
 install:
 	go install ./grit
@@ -18,14 +21,8 @@ clean:
 lint:
 	golangci-lint run
 
-vet:
-	go vet ./...
-
 format:
 	gofumpt -w .
-
-run:
-	go run ./cmd/main.go
 
 coverage:
 	go test -coverprofile=coverage.out ./...

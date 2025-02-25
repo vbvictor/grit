@@ -9,9 +9,9 @@ linters:
     - gci
     - testpackage
     - exhaustruct
-    - gochecknoglobals # need to disable this for storing global configuration values since it is a CLI tool
+    - gochecknoglobals # store global configuration values
     - forbidigo # use printf for showing progress information and verbose output
-    - gochecknoinits # leave as for now here, we need init() functions to setup cobra commands
+    - gochecknoinits # init functions to setup cobra commands
 linters-settings:
   gocritic:
     enable-all: true
@@ -30,4 +30,4 @@ issues:
         - varnamelen
         - dupl
   exclude-dirs:
-    - test/complexity
+    - test/complexity # test code directory
