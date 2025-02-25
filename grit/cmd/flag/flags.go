@@ -1,6 +1,9 @@
 package flag
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 // Global flags used across all commands
 
@@ -38,7 +41,7 @@ var (
 	Tabular                OutputType = "tabular"
 	AvailableOutputFormats            = []OutputType{JSON, Tabular}
 
-	// Coverage Run formats
+	// Coverage Run formats.
 	Always = "always"
 	Never  = "never"
 	Auto   = "auto"
@@ -97,3 +100,17 @@ func LogIfVerbose(format string, args ...any) {
 		fmt.Printf(format, args...)
 	}
 }
+
+type AbsRepoPathError struct {
+	Path string
+}
+
+func (e *AbsRepoPathError) Error() string {
+	return "failed to get absolute path from " + e.Path
+}
+
+var (
+	ErrCoverageNotFound = errors.New("failed to find file with code coverage")
+	ErrReadCoverage     = errors.New("failed to read coverage file")
+	ErrRunCoverage      = errors.New("failed to run coverage")
+)

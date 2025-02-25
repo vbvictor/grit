@@ -5,15 +5,12 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/vbvictor/grit/grit/cmd/flag"
-	"github.com/vbvictor/grit/grit/cmd/plot"
-	"github.com/vbvictor/grit/grit/cmd/report"
 	"github.com/vbvictor/grit/grit/cmd/stat"
 )
 
 var gritCmd = &cobra.Command{
-	Use:   "grit",
-	Short: "Some short description.",
-	Long:  `Some long description.`,
+	Use:  "grit",
+	Long: `All-in-one tool for getting refactoring statistics.`,
 }
 
 func Execute() {
@@ -36,7 +33,7 @@ func Execute() {
 }
 
 func init() {
-	gritCmd.AddCommand(plot.PlotCmd)
+	gritCmd.Root().CompletionOptions.DisableDefaultCmd = true
+
 	gritCmd.AddCommand(stat.StatCmd)
-	gritCmd.AddCommand(report.ReportCmd)
 }

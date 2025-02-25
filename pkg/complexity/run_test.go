@@ -6,6 +6,94 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestAvgComplexity(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []*FileStat
+		expected []*FileStat
+	}{
+		{
+			name: "normal case with multiple functions",
+			input: []*FileStat{
+				{
+					Path: "file1.go",
+					Functions: []FunctionStat{
+						{Name: "func1", Complexity: 5},
+						{Name: "func2", Complexity: 7},
+					},
+				},
+			},
+			expected: []*FileStat{
+				{
+					Path: "file1.go",
+					Functions: []FunctionStat{
+						{Name: "func1", Complexity: 5},
+						{Name: "func2", Complexity: 7},
+					},
+					AvgComplexity: 6.0,
+				},
+			},
+		},
+		{
+			name: "empty functions list",
+			input: []*FileStat{
+				{
+					Path:      "empty.go",
+					Functions: []FunctionStat{},
+				},
+			},
+			expected: []*FileStat{
+				{
+					Path:      "empty.go",
+					Functions: []FunctionStat{},
+				},
+			},
+		},
+		{
+			name: "multiple files with different complexities",
+			input: []*FileStat{
+				{
+					Path: "file1.go",
+					Functions: []FunctionStat{
+						{Name: "func1", Complexity: 10},
+						{Name: "func2", Complexity: 20},
+					},
+				},
+				{
+					Path: "file2.go",
+					Functions: []FunctionStat{
+						{Name: "func3", Complexity: 5},
+					},
+				},
+			},
+			expected: []*FileStat{
+				{
+					Path: "file1.go",
+					Functions: []FunctionStat{
+						{Name: "func1", Complexity: 10},
+						{Name: "func2", Complexity: 20},
+					},
+					AvgComplexity: 15.0,
+				},
+				{
+					Path: "file2.go",
+					Functions: []FunctionStat{
+						{Name: "func3", Complexity: 5},
+					},
+					AvgComplexity: 5.0,
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			AvgComplexity(tt.input)
+			assert.Equal(t, tt.expected, tt.input)
+		})
+	}
+}
+
 func TestComplexityFilter(t *testing.T) {
 	files := []FileStat{
 		{

@@ -29,7 +29,7 @@ func RunGocyclo(repoPath string, opts Options) ([]*FileStat, error) {
 	for _, stat := range stats {
 		relPath, err := filepath.Rel(repoPath, stat.Pos.Filename)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to get relative path: %w", err)
 		}
 
 		funcStat := FunctionStat{

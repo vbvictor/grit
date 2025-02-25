@@ -7,8 +7,7 @@ import (
 
 var StatCmd = &cobra.Command{
 	Use:   "stat",
-	Short: "Some short stat description.",
-	Long:  `Some long stat description.`,
+	Short: "Get statistics about code in the repository",
 }
 
 func init() {

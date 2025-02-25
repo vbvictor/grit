@@ -9,9 +9,9 @@ import (
 func PrintTabular(results []*FileStat, out io.Writer) {
 	_, _ = io.WriteString(out, "\nCode complexity analysis results:\n")
 
-	data := make([][]interface{}, len(results))
+	data := make([][]any, len(results))
 	for i, result := range results {
-		data[i] = []interface{}{result.Path, result.AvgComplexity}
+		data[i] = []any{result.Path, result.AvgComplexity}
 	}
 
 	table := gotabulate.Create(data)

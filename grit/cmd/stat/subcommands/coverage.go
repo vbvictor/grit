@@ -9,17 +9,16 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/vbvictor/grit/grit/cmd/flag"
 	"github.com/vbvictor/grit/pkg/coverage"
-	"github.com/vbvictor/grit/pkg/process"
 )
 
 var CoverageCmd = &cobra.Command{
 	Use:   "coverage <path>",
-	Short: "Show files unit-test coverage in repository",
+	Short: "Find files with the least unit-test coverage in directory",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(_ *cobra.Command, args []string) error {
 		repoPath, err := filepath.Abs(args[0])
 		if err != nil {
-			return errors.Join(&process.ErrAbsRepoPath{Path: args[0]}, err)
+			return errors.Join(&flag.AbsRepoPathError{Path: args[0]}, err)
 		}
 
 		flag.LogIfVerbose("Processing directory: %s\n", repoPath)
@@ -75,14 +74,14 @@ func GetCoverageData(repoPath, coverageFile string, opts coverage.Options) ([]*c
 			flag.LogIfVerbose("Running test suite\n\n")
 
 			if err = coverage.RunCoverage(repoPath, coverageFile); err != nil {
-				return nil, errors.Join(process.ErrRunCoverage, err)
+				return nil, errors.Join(flag.ErrRunCoverage, err)
 			}
 
 			flag.LogIfVerbose("Coverage file %s created\n", coveragePath)
 		} else {
 			flag.LogIfVerbose("Go test did not run since flag run='Never'\n")
 
-			return nil, errors.Join(process.ErrCoverageNotFound, err)
+			return nil, errors.Join(flag.ErrCoverageNotFound, err)
 		}
 	} else if flag.RunCoverage == flag.Always {
 		flag.LogIfVerbose("Removing previous test coverage file %s\n", coveragePath)
@@ -90,7 +89,7 @@ func GetCoverageData(repoPath, coverageFile string, opts coverage.Options) ([]*c
 		flag.LogIfVerbose("Running test suite\n\n")
 
 		if err = coverage.RunCoverage(repoPath, coverageFile); err != nil {
-			return nil, errors.Join(process.ErrRunCoverage, err)
+			return nil, errors.Join(flag.ErrRunCoverage, err)
 		}
 
 		flag.LogIfVerbose("Coverage file %s created\n", coveragePath)
@@ -98,7 +97,7 @@ func GetCoverageData(repoPath, coverageFile string, opts coverage.Options) ([]*c
 
 	covData, err := coverage.ReadCoverage(filepath.Join(repoPath, flag.CoverageFile), opts)
 	if err != nil {
-		return nil, errors.Join(process.ErrReadCoverage, err)
+		return nil, errors.Join(flag.ErrReadCoverage, err)
 	}
 
 	return covData, nil

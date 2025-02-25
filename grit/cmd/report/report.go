@@ -11,7 +11,6 @@ import (
 	stat "github.com/vbvictor/grit/grit/cmd/stat/subcommands"
 	"github.com/vbvictor/grit/pkg/complexity"
 	"github.com/vbvictor/grit/pkg/git"
-	"github.com/vbvictor/grit/pkg/process"
 	"github.com/vbvictor/grit/pkg/report"
 )
 
@@ -35,7 +34,7 @@ var ReportCmd = &cobra.Command{
 	RunE: func(_ *cobra.Command, args []string) error {
 		repoPath, err := filepath.Abs(args[0])
 		if err != nil {
-			return errors.Join(&process.ErrAbsRepoPath{Path: args[0]}, err)
+			return errors.Join(&flag.AbsRepoPathError{Path: args[0]}, err)
 		}
 
 		flag.LogIfVerbose("Processing directory: %s", repoPath)
@@ -67,7 +66,7 @@ var ReportCmd = &cobra.Command{
 		flag.LogIfVerbose("Got %d files", len(complexityStats))
 
 		// Get coverage data
-		coverageStats, err := stat.GetCoverageData(repoPath, flag.CoverageFile)
+		coverageStats, err := stat.GetCoverageData(repoPath, flag.CoverageFile, stat.CoverageOptsFromFlags())
 		if err != nil {
 			return fmt.Errorf("error reading coverage: %w", err)
 		}

@@ -13,7 +13,7 @@ import (
 
 var ChurnCmd = &cobra.Command{
 	Use:   "churn <path>",
-	Short: "Show files that have the most changes in repository",
+	Short: "Find files with the most changes in git repository",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(_ *cobra.Command, args []string) error {
 		repoPath, err := filepath.Abs(args[0])
