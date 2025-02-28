@@ -53,7 +53,7 @@ func init() {
 	flags.StringVar(&flag.ExcludePath, flag.LongExclude, "", "Exclude files matching regex pattern")
 }
 
-func ComplexityOptsFromFlags() (complexity.Options, error) { //nolint:unparam // error for future use
+func ComplexityOptsFromFlags() (complexity.Options, error) { //nolint:unparam // error return is reserved for future
 	opts := complexity.Options{}
 
 	opts.Top = flag.Top

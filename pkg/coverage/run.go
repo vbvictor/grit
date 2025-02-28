@@ -41,7 +41,7 @@ type Options struct {
 	ExcludePath string
 }
 
-func ReadCoverage(coverageFile string, opts Options) ([]*FileCoverage, error) {
+func ReadCoverage(coverageFile string, _ Options) ([]*FileCoverage, error) {
 	profiles, err := cover.ParseProfiles(coverageFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse profiles data: %w", err)
@@ -124,8 +124,6 @@ func RunCoverage(repoPath, coverageFile string) error {
 	return nil
 }
 
-// sortByCoverage sorts FileCoverage slice by Coverage field
-// Ascending order if asc is true, descending if false
 func sortByCoverage(files []FileCoverage, asc bool) []FileCoverage {
 	sorted := make([]FileCoverage, len(files))
 	copy(sorted, files)

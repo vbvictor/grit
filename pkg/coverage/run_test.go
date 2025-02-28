@@ -52,7 +52,7 @@ example.com/pkg/file1.go:10.20,30.2 3 1`,
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tmpfile, err := os.CreateTemp("", "coverage.*.out")
+			tmpfile, err := os.CreateTemp(t.TempDir(), "coverage.*.out")
 			require.NoError(t, err, "Failed to create temp file")
 			defer os.Remove(tmpfile.Name())
 

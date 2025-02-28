@@ -9,60 +9,57 @@ import (
 	"github.com/vbvictor/grit/pkg/plot"
 )
 
-var (
-	outputFile string
-	PlotCmd    = &cobra.Command{
-		Use:   "plot [flags] <repository>",
-		Short: "Compare code complexity and churn metrics",
-		Args:  cobra.ExactArgs(1),
-		PreRunE: func(_ *cobra.Command, _ []string) error {
-			return plot.ValidateRiskThresholds()
-		},
-		RunE: func(_ *cobra.Command, args []string) error {
-			repoPath, err := filepath.Abs(args[0])
+var PlotCmd = &cobra.Command{
+	Use:   "plot [flags] <repository>",
+	Short: "Compare code complexity and churn metrics",
+	Args:  cobra.ExactArgs(1),
+	PreRunE: func(_ *cobra.Command, _ []string) error {
+		return plot.ValidateRiskThresholds()
+	},
+	RunE: func(_ *cobra.Command, args []string) error {
+		repoPath, err := filepath.Abs(args[0])
+		if err != nil {
+			return fmt.Errorf("error getting absolute path: %w", err)
+		}
+
+		if flag.Verbose {
+			fmt.Printf("Processing repository: %s\n", repoPath)
+		}
+
+		// TODO(v.baranov) refactor
+		/*
+			churns, err := git.MostGitChurnFiles(repoPath)
 			if err != nil {
-				return fmt.Errorf("error getting absolute path: %w", err)
+				return fmt.Errorf("error reading churn data: %w", err)
 			}
 
-			if flag.Verbose {
-				fmt.Printf("Processing repository: %s\n", repoPath)
-			}
 
-			//TODO(v.baranov) refactor
-			/*
-				churns, err := git.MostGitChurnFiles(repoPath)
-				if err != nil {
-					return fmt.Errorf("error reading churn data: %w", err)
+				if err := complexity.CheckLizardExecutable(); err != nil {
+
+					return fmt.Errorf("failed to find lizard Executable: %w", err)
 				}
 
+				fileStat, err := complexity.RunLizardCmd(repoPath, complexity.Opts)
+				if err != nil {
+					return fmt.Errorf("error running lizard command: %w", err)
+				}
 
-					if err := complexity.CheckLizardExecutable(); err != nil {
+				fileStat = complexity.ApplyFilters(fileStat,
+					complexity.MinComplexityFilter{MinComplexity: complexity.MinComplexityDefault}.Filter)
+				plotEntries := plot.PreparePlotData(fileStat, churns)
 
-						return fmt.Errorf("failed to find lizard Executable: %w", err)
-					}
+				if err := plot.CreateScatterChart(plotEntries, plot.NewRisksMapper(), outputFile); err != nil {
+					return fmt.Errorf("error creating chart: %w", err)
+				}
 
-					fileStat, err := complexity.RunLizardCmd(repoPath, complexity.Opts)
-					if err != nil {
-						return fmt.Errorf("error running lizard command: %w", err)
-					}
+				if flag.Verbose {
+					fmt.Printf("Chart generated: %s\n", outputFile)
+				}
+		*/
 
-					fileStat = complexity.ApplyFilters(fileStat,
-						complexity.MinComplexityFilter{MinComplexity: complexity.MinComplexityDefault}.Filter)
-					plotEntries := plot.PreparePlotData(fileStat, churns)
-
-					if err := plot.CreateScatterChart(plotEntries, plot.NewRisksMapper(), outputFile); err != nil {
-						return fmt.Errorf("error creating chart: %w", err)
-					}
-
-					if flag.Verbose {
-						fmt.Printf("Chart generated: %s\n", outputFile)
-					}
-			*/
-
-			return nil
-		},
-	}
-)
+		return nil
+	},
+}
 
 func init() {
 	// flags := PlotCmd.PersistentFlags()

@@ -74,7 +74,7 @@ type ChurnChunk struct {
 	Commits int    `json:"commits"`
 }
 
-func ReadGitChurn(repoPath string, opts ChurnOptions) ([]*ChurnChunk, error) {
+func ReadGitChurn(repoPath string, opts *ChurnOptions) ([]*ChurnChunk, error) {
 	cmd := buildGitCommand(repoPath, opts)
 
 	output, err := executeGitCommand(cmd, repoPath)
@@ -90,7 +90,7 @@ func ReadGitChurn(repoPath string, opts ChurnOptions) ([]*ChurnChunk, error) {
 	return maps.Values(fileStats), nil
 }
 
-func buildGitCommand(repoPath string, opts ChurnOptions) []string {
+func buildGitCommand(repoPath string, opts *ChurnOptions) []string {
 	cmd := []string{"git", "log", "--pretty=format:%H", "--numstat"}
 
 	if !opts.Since.IsZero() {
@@ -118,7 +118,7 @@ func executeGitCommand(cmd []string, repoPath string) ([]byte, error) {
 	return output, nil
 }
 
-func processLines(lines []string, fileStats map[string]*ChurnChunk, opts ChurnOptions) {
+func processLines(lines []string, fileStats map[string]*ChurnChunk, opts *ChurnOptions) {
 	currentCommit := ""
 	modifiedInCommit := make(map[string]bool)
 
@@ -137,7 +137,9 @@ func processLines(lines []string, fileStats map[string]*ChurnChunk, opts ChurnOp
 	}
 }
 
-func processCommit(currentCommit string, modifiedInCommit map[string]bool, fileStats map[string]*ChurnChunk, opts ChurnOptions) {
+func processCommit(currentCommit string, modifiedInCommit map[string]bool, fileStats map[string]*ChurnChunk,
+	opts *ChurnOptions,
+) {
 	if currentCommit != "" && len(modifiedInCommit) > 0 {
 		for filepath := range modifiedInCommit {
 			if shouldSkipFile(filepath, opts) {
@@ -149,7 +151,9 @@ func processCommit(currentCommit string, modifiedInCommit map[string]bool, fileS
 	}
 }
 
-func processFileLine(line string, fileStats map[string]*ChurnChunk, modifiedInCommit map[string]bool, opts ChurnOptions) {
+func processFileLine(line string, fileStats map[string]*ChurnChunk, modifiedInCommit map[string]bool,
+	opts *ChurnOptions,
+) {
 	parts := strings.Fields(line)
 	if len(parts) == 3 && isNumeric(parts[0]) && isNumeric(parts[1]) {
 		additions, _ := strconv.Atoi(parts[0])
@@ -183,7 +187,7 @@ func isNumeric(s string) bool {
 	return err == nil
 }
 
-func shouldSkipFile(file string, opts ChurnOptions) bool {
+func shouldSkipFile(file string, opts *ChurnOptions) bool {
 	if opts.ExcludePath != "" {
 		if matched, _ := regexp.MatchString(opts.ExcludePath, file); matched {
 			return true

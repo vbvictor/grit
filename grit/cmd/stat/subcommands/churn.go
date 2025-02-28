@@ -59,8 +59,8 @@ func init() {
 	ChurnCmd.Flag(flag.LongSince).DefValue = flag.DefaultSince
 }
 
-func ChurnOptsFromFlags() (git.ChurnOptions, error) {
-	opts := git.ChurnOptions{}
+func ChurnOptsFromFlags() (*git.ChurnOptions, error) {
+	opts := new(git.ChurnOptions)
 
 	opts.SortBy = flag.SortBy
 	opts.Top = flag.Top

@@ -10,7 +10,7 @@ func TestPrintTable(t *testing.T) {
 	testCases := []struct {
 		name     string
 		input    []*ChurnChunk
-		opts     ChurnOptions
+		opts     *ChurnOptions
 		expected []string
 	}{
 		{
@@ -24,7 +24,7 @@ func TestPrintTable(t *testing.T) {
 					Commits: 5,
 				},
 			},
-			opts: ChurnOptions{
+			opts: &ChurnOptions{
 				Top:    1,
 				SortBy: "changes",
 			},
@@ -52,7 +52,7 @@ func TestPrintTable(t *testing.T) {
 					Commits: 10,
 				},
 			},
-			opts: ChurnOptions{
+			opts: &ChurnOptions{
 				Top:    2,
 				SortBy: "commits",
 			},

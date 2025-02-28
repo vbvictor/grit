@@ -3,7 +3,6 @@ package report
 import (
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
@@ -65,34 +64,37 @@ var ReportCmd = &cobra.Command{
 		}
 		flag.LogIfVerbose("Got %d files", len(complexityStats))
 
-		// Get coverage data
-		coverageStats, err := stat.GetCoverageData(repoPath, flag.CoverageFile, stat.CoverageOptsFromFlags())
-		if err != nil {
-			return fmt.Errorf("error reading coverage: %w", err)
-		}
+		/*
+			// Get coverage data
+			coverageStats, err := stat.GetCoverageData(repoPath, flag.CoverageFile, stat.CoverageOptsFromFlags())
+			if err != nil {
+				return fmt.Errorf("error reading coverage: %w", err)
+			}
 
-		// Combine data into FileScores
-		fileScores := make([]*report.FileScore, 0)
-		fileScores[1] = &report.FileScore{
-			File:       coverageStats[1].File,
-			Coverage:   0.8,
-			Complexity: 10,
-			Churn:      100,
-			Score:      0.8,
-		}
 
-		coverageStats = nil
+			// Combine data into FileScores
+			fileScores := make([]*report.FileScore, 0)
+			fileScores[1] = &report.FileScore{
+				File:       coverageStats[1].File,
+				Coverage:   0.8,
+				Complexity: 10,
+				Churn:      100,
+				Score:      0.8,
+			}
 
-		// Calculate final scores
-		fileScores = report.CalculateScores(fileScores, report.ReportOpts)
-		fileScores = report.SortByScore(fileScores)
+			coverageStats = nil
 
-		// Limit output to top N
-		if report.ReportOpts.Top > 0 && report.ReportOpts.Top < len(fileScores) {
-			fileScores = fileScores[:report.ReportOpts.Top]
-		}
+			// Calculate final scores
+			fileScores = report.CalculateScores(fileScores, report.ReportOpts)
+			fileScores = report.SortByScore(fileScores)
 
-		report.PrintStats(fileScores, os.Stdout, report.ReportOpts)
+			// Limit output to top N
+			if report.ReportOpts.Top > 0 && report.ReportOpts.Top < len(fileScores) {
+				fileScores = fileScores[:report.ReportOpts.Top]
+			}
+
+			report.PrintStats(fileScores, os.Stdout, report.ReportOpts)
+		*/
 
 		return nil
 	},
@@ -116,7 +118,8 @@ func init() {
 
 	// Coverage flags
 	flags.StringVarP(&flag.RunCoverage, flag.LongRunCoverage, flag.ShortRunCoverage, flag.Auto, "Specify tests run format")
-	flags.StringVarP(&flag.CoverageFile, flag.LongFileCoverage, flag.ShortFileCoverage, "coverage.out", "Coverage file name")
+	flags.StringVarP(&flag.CoverageFile, flag.LongFileCoverage, flag.ShortFileCoverage, "coverage.out",
+		"Coverage file name")
 
 	// Report specific flags
 	flags.Float64Var(&report.ReportOpts.ChurnFactor, "churn-factor", 1.0, "Churn factor")

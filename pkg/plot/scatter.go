@@ -62,7 +62,7 @@ func formDataSeries(entries []ScatterEntry, mapper EntryMapper) ScatterSeries {
 	for _, entry := range groupedEntries {
 		category := mapper.Map(entry.ScatterData)
 		series[category] = append(series[category], opts.ScatterData{
-			Value:      []interface{}{entry.Complexity, entry.Churn, strings.Join(entry.Files, "<br/>")},
+			Value:      []any{entry.Complexity, entry.Churn, strings.Join(entry.Files, "<br/>")},
 			Symbol:     "circle",
 			SymbolSize: ScatterSymbolSize,
 		})
@@ -72,7 +72,7 @@ func formDataSeries(entries []ScatterEntry, mapper EntryMapper) ScatterSeries {
 }
 
 // CreateScatterChart generates a scatter plot from the provided entries.
-func CreateScatterChart(
+func CreateScatterChart( //nolint:funlen // TODO(v.baranov): Refactor
 	entries []ScatterEntry,
 	mapper EntryMapper,
 	outputPath string,

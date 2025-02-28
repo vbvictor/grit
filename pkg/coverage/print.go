@@ -10,9 +10,9 @@ import (
 func PrintTabular(results []*FileCoverage, out io.Writer) {
 	fmt.Fprintf(out, "\nCode coverage analysis results:\n")
 
-	data := make([][]interface{}, len(results))
+	data := make([]any, len(results))
 	for i, result := range results {
-		data[i] = []interface{}{
+		data[i] = []any{
 			result.File,
 			fmt.Sprintf("%.2f%%", result.Coverage),
 			result.Statements,

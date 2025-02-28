@@ -115,6 +115,7 @@ func TestPrintCSV(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			var buf bytes.Buffer
+
 			PrintCSV(tc.input, &buf)
 
 			if got := buf.String(); got != tc.expected {

@@ -14,9 +14,9 @@ func PrintStats(results []*FileScore, out io.Writer, opts Options) error {
 func printTabular(results []*FileScore, out io.Writer, opts Options) error {
 	fmt.Fprintf(out, "\nCode health analysis results (top %d):\n", opts.Top)
 
-	data := make([][]interface{}, len(results))
+	data := make([][]any, len(results))
 	for i, result := range results {
-		data[i] = []interface{}{
+		data[i] = []any{
 			result.File,
 			fmt.Sprintf("%.2f", result.Score),
 			fmt.Sprintf("%.2f", result.Churn),

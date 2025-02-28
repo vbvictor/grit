@@ -152,6 +152,8 @@ func extractFileNames(chunks []*ChurnChunk) []string {
 }
 
 func assertSorted(t *testing.T, result []*ChurnChunk, ext func(*ChurnChunk) any) {
+	t.Helper()
+
 	for i := 1; i < len(result); i++ {
 		assert.GreaterOrEqual(t, ext(result[i-1]), ext(result[i]))
 	}
@@ -179,7 +181,7 @@ func TestReadChurn(t *testing.T) {
 
 			Unbundle(t, tt.bundle, tmpDir)
 
-			results, err := ReadGitChurn(tmpDir, ChurnOptions{})
+			results, err := ReadGitChurn(tmpDir, &ChurnOptions{})
 			require.NoError(t, err)
 			assert.Len(t, results, len(tt.expected))
 
@@ -201,13 +203,13 @@ func TestShouldSkipFile(t *testing.T) {
 	tests := []struct {
 		name     string
 		file     string
-		opts     ChurnOptions
+		opts     *ChurnOptions
 		expected bool
 	}{
 		{
 			name: "exclude pattern matches",
 			file: "vendor/some/pkg/file.go",
-			opts: ChurnOptions{
+			opts: &ChurnOptions{
 				ExcludePath: "vendor/.*",
 			},
 			expected: true,
@@ -215,7 +217,7 @@ func TestShouldSkipFile(t *testing.T) {
 		{
 			name: "exclude pattern does not match",
 			file: "src/pkg/file.go",
-			opts: ChurnOptions{
+			opts: &ChurnOptions{
 				ExcludePath: "vendor/.*",
 			},
 			expected: false,
@@ -223,7 +225,7 @@ func TestShouldSkipFile(t *testing.T) {
 		{
 			name: "extension matches allowed list",
 			file: "main.go",
-			opts: ChurnOptions{
+			opts: &ChurnOptions{
 				Extensions: map[string]struct{}{
 					"go": {},
 				},
@@ -233,7 +235,7 @@ func TestShouldSkipFile(t *testing.T) {
 		{
 			name: "extension not in allowed list",
 			file: "script.py",
-			opts: ChurnOptions{
+			opts: &ChurnOptions{
 				Extensions: map[string]struct{}{
 					"go":  {},
 					"cpp": {},
@@ -244,13 +246,13 @@ func TestShouldSkipFile(t *testing.T) {
 		{
 			name:     "no filters applied",
 			file:     "any/path/file.txt",
-			opts:     ChurnOptions{},
+			opts:     &ChurnOptions{},
 			expected: false,
 		},
 		{
 			name: "both filters applied - file matches both",
 			file: "src/main.go",
-			opts: ChurnOptions{
+			opts: &ChurnOptions{
 				ExcludePath: "test/.*",
 				Extensions: map[string]struct{}{
 					"go": {},
