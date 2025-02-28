@@ -1,9 +1,8 @@
-name: Go PR
+name: Go Main
 
 on:
-  pull_request:
+  push:
     branches: [ main ]
-    types: [opened, reopened, synchronize]
 
 jobs:
   Build:
@@ -23,32 +22,9 @@ jobs:
       run: make test-with-coverage
 
     - name: Coverage
-      id: coverage
       uses: vladopajic/go-test-coverage@v2
       with:
         config: ./.testcoverage.yml
-
-    # Coverage report for PR
-    - name: Is report present
-      uses: peter-evans/find-comment@v3
-      id: fc
-      with:
-        issue-number: ${{ github.event.pull_request.number }}
-        comment-author: 'github-actions[bot]'
-        body-includes: 'go-test-coverage report:'
-    
-    - name: Post coverage report
-      uses: peter-evans/create-or-update-comment@v4
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        issue-number: ${{ github.event.pull_request.number }}
-        comment-id: ${{ steps.fc.outputs.comment-id }}
-        body: |
-          go-test-coverage report:
-          ```
-          ${{ fromJSON(steps.coverage.outputs.report) }} 
-          ```
-        edit-mode: replace
 
     - name: Check coverage
       if: steps.coverage.outcome == 'failure'

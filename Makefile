@@ -7,12 +7,16 @@ grit:
 
 build:
 	go build ./...
+	go build -o grit ./grit
 
 install:
 	go install ./grit
 
 test:
-	go test -v -cover ./...
+	go test -v ./...
+
+test-with-coverage:
+	go test -v -cover -coverprofile=coverage.out ./...
 
 clean:
 	go clean
@@ -25,7 +29,7 @@ format:
 	gofumpt -w .
 
 coverage:
-	go test -coverprofile=coverage.out ./...
+	go test -v -cover -coverprofile=coverage.out ./...
 	go tool cover -html=coverage.out
 
 deps:

@@ -10,7 +10,7 @@ const Version = "v0.1.0"
 
 var VersionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Print program version",
+	Short: "Print GRIT version and exit",
 	Args:  cobra.ExactArgs(0),
 	RunE: func(_ *cobra.Command, _ []string) error {
 		fmt.Printf("Version: %s", Version)

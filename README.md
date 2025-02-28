@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 GRIT is a cli tool that helps developers understand their codebase
-maintainability index through key metrics: code churn, code complexity and test
+maintainability index through calculated key metrics: code churn, code complexity and test
 coverage. Use calculated maintainability index to make decisions about
 refactoring and testing priorities.
 
@@ -15,6 +15,9 @@ refactoring and testing priorities.
   - [Getting Started](#getting-started)
   - [Usage](#usage)
     - [Help command](#help-command)
+    - [Churn command](#churn-command)
+    - [Complexity command](#complexity-command)
+    - [Coverage command](#coverage-command)
   - [Roadmap](#roadmap)
   - [Contributing](#contributing)
   - [License](#license)
@@ -23,9 +26,9 @@ refactoring and testing priorities.
 
 <!-- - **Maintainability Score**: Combines metrics to rate maintainability index-->
 <!-- - **Visual Analytics**: Generates churn vs complexity graphs -->
-- **Code Churn**: Track how frequently files change over time
-- **Code Complexity**: Calculate cyclomatic complexity metric per file
-- **Test Coverage**: Analyze test coverage percentage per file
+- **Code Churn**: Tracks how frequently files change over time.
+- **Code Complexity**: Calculates cyclomatic complexity metric per file.
+- **Test Coverage**: Analyzes test coverage percentage per file.
 
 All of these metrics are useful when making decisions about:
 
@@ -48,7 +51,7 @@ Or Download the latest binary release from [Github Releases](https://github.com/
 
 ### Help command
 
-Run `grit -h` to check out all available commands:
+Run `grit -h` to check out all available commands and general help for `grit`:
 
 ```sh
 All-in-one tool for getting refactoring statistics.
@@ -63,6 +66,12 @@ Available Commands:
 Flags:
   -h, --help   help for grit
 ```
+
+### Churn command
+
+### Complexity command
+
+### Coverage command
 
 ## Roadmap
 
