@@ -13,7 +13,7 @@ import (
 
 var CoverageCmd = &cobra.Command{
 	Use:   "coverage <path>",
-	Short: "Find files with the least unit-test coverage in directory",
+	Short: "Finds files with the least unit-test coverage",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(_ *cobra.Command, args []string) error {
 		repoPath, err := filepath.Abs(args[0])

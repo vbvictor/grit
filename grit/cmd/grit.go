@@ -11,7 +11,7 @@ import (
 var gritCmd = &cobra.Command{
 	Use: "grit",
 	Long: `GRIT is an all-in-one cli tool that helps developers understand
-	their codebase maintainability index through calculated metrics.`,
+their codebase maintainability index through calculated metrics.`,
 }
 
 func Execute() {

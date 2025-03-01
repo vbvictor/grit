@@ -1,6 +1,7 @@
 # Go Refactoring Insight Tool
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Go Main](https://github.com/vbvictor/grit/actions/workflows/go-main.yaml/badge.svg)](https://github.com/vbvictor/grit/actions/workflows/go-main.yaml)
 
 GRIT is a cli tool that helps developers understand their codebase
 maintainability index through calculated key metrics: code churn, code complexity and test
@@ -15,9 +16,6 @@ refactoring and testing priorities.
   - [Getting Started](#getting-started)
   - [Usage](#usage)
     - [Help command](#help-command)
-    - [Churn command](#churn-command)
-    - [Complexity command](#complexity-command)
-    - [Coverage command](#coverage-command)
   - [Roadmap](#roadmap)
   - [Contributing](#contributing)
   - [License](#license)
@@ -30,10 +28,11 @@ refactoring and testing priorities.
 - **Code Complexity**: Calculates cyclomatic complexity metric per file.
 - **Test Coverage**: Analyzes test coverage percentage per file.
 
-All of these metrics are useful when making decisions about:
+All these metrics are useful when making decisions about:
 
-- Best candidates for refactoring efforts
-- What most complex files to cover with unit tests first
+- Best file candidates for refactoring efforts
+- Best file candidates for unit tests coverage
+- Best file candidates for code complexity reduction
 
 <!-- These metrics if measured regularly can address appearing maintainability issues in a large codebase. -->
   
@@ -54,24 +53,31 @@ Or Download the latest binary release from [Github Releases](https://github.com/
 Run `grit -h` to check out all available commands and general help for `grit`:
 
 ```sh
-All-in-one tool for getting refactoring statistics.
+GRIT is an all-in-one cli tool that helps developers understand
+their codebase maintainability index through calculated metrics.
 
 Usage:
   grit [command]
 
 Available Commands:
   help        Help about any command
-  stat        Get various statistics about code in the repository
+  stat        Calculate code metrics
 
 Flags:
   -h, --help   help for grit
+
+Use "grit [command] --help" for more information about a command.
 ```
 
-### Churn command
+Each command has its own extensive description that can be accessed by running `grit [command] -h`.
 
-### Complexity command
+<!-- ### Usage examples -->
 
-### Coverage command
+<!-- #### Churn command -->
+
+<!-- #### Complexity command -->
+
+<!-- #### Coverage command -->
 
 ## Roadmap
 

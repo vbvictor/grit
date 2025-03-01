@@ -13,7 +13,7 @@ import (
 
 var ComplexityCmd = &cobra.Command{
 	Use:   "complexity <path>",
-	Short: "Find the most complex files in directory",
+	Short: "Finds the most complex files",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(_ *cobra.Command, args []string) error {
 		repoPath, err := filepath.Abs(args[0])

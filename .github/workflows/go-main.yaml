@@ -26,7 +26,7 @@ jobs:
       with:
         config: ./.testcoverage.yml
 
-    - name: Check coverage
+    - name: Check failed coverage
       if: steps.coverage.outcome == 'failure'
       shell: bash
       run: echo "coverage check failed" && exit 1
