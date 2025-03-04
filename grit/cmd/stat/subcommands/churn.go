@@ -11,6 +11,15 @@ import (
 	"github.com/vbvictor/grit/pkg/git"
 )
 
+var ChurnOpts = &git.ChurnOptions{
+	SortBy:       git.Changes,
+	Top:          git.DefaultTop,
+	Extensions:   nil,
+	Since:        time.Time{},
+	Until:        time.Time{},
+	OutputFormat: flag.JSON,
+}
+
 var ChurnCmd = &cobra.Command{
 	Use:   "churn <path>",
 	Short: "Finds files with the most changes in git repository",
@@ -43,7 +52,7 @@ var ChurnCmd = &cobra.Command{
 }
 
 func init() {
-	flags := ChurnCmd.PersistentFlags()
+	flags := ChurnCmd.LocalFlags()
 
 	flags.StringVar(&flag.SortBy, flag.LongSort, "commits",
 		fmt.Sprintf("Sort by: %s, %s, %s, %s", git.Changes, git.Additions, git.Deletions, git.Commits))
@@ -55,8 +64,8 @@ func init() {
 	flags.StringVarP(&flag.Since, flag.LongSince, flag.ShortSince, "", "Start date for analysis (YYYY-MM-DD)")
 	flags.StringVarP(&flag.Until, flag.LongUntil, flag.ShortUntil, "", "End date for analysis (YYYY-MM-DD)")
 
-	ChurnCmd.Flag(flag.LongUntil).DefValue = flag.DefaultUntil
-	ChurnCmd.Flag(flag.LongSince).DefValue = flag.DefaultSince
+	// ChurnCmd.Flag(flag.LongUntil).DefValue = flag.DefaultUntil
+	// ChurnCmd.Flag(flag.LongSince).DefValue = flag.DefaultSince
 }
 
 func ChurnOptsFromFlags() (*git.ChurnOptions, error) {

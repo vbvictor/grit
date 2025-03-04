@@ -44,7 +44,7 @@ var ComplexityCmd = &cobra.Command{
 }
 
 func init() {
-	flags := ComplexityCmd.PersistentFlags()
+	flags := ComplexityCmd.LocalFlags()
 
 	flags.StringVarP(&flag.Engine, flag.LongEngine, flag.ShortEngine, complexity.Gocyclo,
 		"Complexity calculation engine to use: gocyclo or gocognit")

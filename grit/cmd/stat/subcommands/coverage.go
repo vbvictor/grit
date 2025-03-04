@@ -39,7 +39,7 @@ var CoverageCmd = &cobra.Command{
 }
 
 func init() {
-	flags := CoverageCmd.PersistentFlags()
+	flags := CoverageCmd.LocalFlags()
 
 	flags.StringVar(&flag.SortBy, flag.LongSort, coverage.Worst, "Specify sort type")
 	flags.StringVarP(&flag.RunCoverage, flag.LongRunCoverage, flag.ShortRunCoverage, flag.Auto, `Specify tests run format:
