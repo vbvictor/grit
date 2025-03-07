@@ -11,7 +11,13 @@ import (
 	"github.com/vbvictor/grit/pkg/git"
 )
 
-var ComplexityCmd = &cobra.Command{
+var complexityOpts = complexity.Options{
+	Engine:      complexity.Gocyclo,
+	ExcludePath: "",
+	Top:         10, //nolint:mnd // default value
+}
+
+var ComplexityCmd = &cobra.Command{ //nolint:exhaustruct // no need to set all fields
 	Use:   "complexity <path>",
 	Short: "Finds the most complex files",
 	Args:  cobra.ExactArgs(1),
@@ -21,21 +27,14 @@ var ComplexityCmd = &cobra.Command{
 			return fmt.Errorf("error getting absolute path: %w", err)
 		}
 
-		if flag.Verbose {
-			fmt.Printf("Processing repository: %s\n", repoPath)
-		}
+		flag.LogIfVerbose("Processing repository: %s\n", repoPath)
 
-		opts, err := ComplexityOptsFromFlags()
-		if err != nil {
-			return fmt.Errorf("failed to create options: %w", err)
-		}
-
-		fileStat, err := complexity.RunComplexity(repoPath, opts)
+		fileStat, err := complexity.RunComplexity(repoPath, complexityOpts)
 		if err != nil {
 			return fmt.Errorf("error running complexity analysis: %w", err)
 		}
 
-		fileStat = complexity.SortAndLimit(fileStat, opts)
+		fileStat = complexity.SortAndLimit(fileStat, complexityOpts)
 
 		complexity.PrintTabular(fileStat, os.Stdout)
 
@@ -44,21 +43,11 @@ var ComplexityCmd = &cobra.Command{
 }
 
 func init() {
-	flags := ComplexityCmd.LocalFlags()
+	flags := ComplexityCmd.PersistentFlags()
 
-	flags.StringVarP(&flag.Engine, flag.LongEngine, flag.ShortEngine, complexity.Gocyclo,
+	flags.StringVarP(&complexityOpts.Engine, flag.LongEngine, flag.ShortEngine, complexity.Gocyclo,
 		"Complexity calculation engine to use: gocyclo or gocognit")
-	flags.IntVarP(&flag.Top, flag.LongTop, flag.ShortTop, git.DefaultTop, "Number of top files to display")
+	flags.IntVarP(&complexityOpts.Top, flag.LongTop, flag.ShortTop, git.DefaultTop, "Number of top files to display")
 	flags.BoolVarP(&flag.Verbose, flag.LongVerbose, flag.ShortVerbose, false, "Show detailed progress")
-	flags.StringVar(&flag.ExcludePath, flag.LongExclude, "", "Exclude files matching regex pattern")
-}
-
-func ComplexityOptsFromFlags() (complexity.Options, error) { //nolint:unparam // error return is reserved for future
-	opts := complexity.Options{}
-
-	opts.Top = flag.Top
-	opts.ExcludePath = flag.ExcludePath
-	opts.Engine = flag.Engine
-
-	return opts, nil
+	flags.StringVar(&complexityOpts.ExcludePath, flag.LongExclude, "", "Exclude files matching regex pattern")
 }

@@ -7,9 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/vbvictor/grit/grit/cmd/flag"
-	stat "github.com/vbvictor/grit/grit/cmd/stat/subcommands"
 	"github.com/vbvictor/grit/pkg/complexity"
-	"github.com/vbvictor/grit/pkg/git"
 	"github.com/vbvictor/grit/pkg/report"
 )
 
@@ -37,63 +35,63 @@ var ReportCmd = &cobra.Command{
 		}
 
 		flag.LogIfVerbose("Processing directory: %s", repoPath)
-
-		churnOpts, err := stat.ChurnOptsFromFlags()
-		if err != nil {
-			return fmt.Errorf("failed to create churn options: %w", err)
-		}
-		churnOpts.Path = repoPath
-
-		flag.LogIfVerbose("Analyzing churn data...")
-		churnStats, err := git.ReadGitChurn(repoPath, churnOpts)
-		if err != nil {
-			return fmt.Errorf("error getting churn stats: %w", err)
-		}
-		flag.LogIfVerbose("Got %d files", len(churnStats))
-
-		// Get complexity data
-		complexityOpts, err := stat.ComplexityOptsFromFlags()
-		if err != nil {
-			return fmt.Errorf("failed to create complexity options: %w", err)
-		}
-
-		flag.LogIfVerbose("Analyzing complexity data...")
-		complexityStats, err := complexity.RunComplexity(repoPath, complexityOpts)
-		if err != nil {
-			return fmt.Errorf("error running complexity analysis: %w", err)
-		}
-		flag.LogIfVerbose("Got %d files", len(complexityStats))
-
 		/*
-			// Get coverage data
-			coverageStats, err := stat.GetCoverageData(repoPath, flag.CoverageFile, stat.CoverageOptsFromFlags())
+
+			churnOpts, err := stat.ChurnOptsFromFlags()
 			if err != nil {
-				return fmt.Errorf("error reading coverage: %w", err)
+				return fmt.Errorf("failed to create churn options: %w", err)
+			}
+			churnOpts.Path = repoPath
+
+			flag.LogIfVerbose("Analyzing churn data...")
+			churnStats, err := git.ReadGitChurn(repoPath, churnOpts)
+			if err != nil {
+				return fmt.Errorf("error getting churn stats: %w", err)
+			}
+			flag.LogIfVerbose("Got %d files", len(churnStats))
+
+			// Get complexity data
+			complexityOpts, err := stat.ComplexityOptsFromFlags()
+			if err != nil {
+				return fmt.Errorf("failed to create complexity options: %w", err)
 			}
 
-
-			// Combine data into FileScores
-			fileScores := make([]*report.FileScore, 0)
-			fileScores[1] = &report.FileScore{
-				File:       coverageStats[1].File,
-				Coverage:   0.8,
-				Complexity: 10,
-				Churn:      100,
-				Score:      0.8,
+			flag.LogIfVerbose("Analyzing complexity data...")
+			complexityStats, err := complexity.RunComplexity(repoPath, complexityOpts)
+			if err != nil {
+				return fmt.Errorf("error running complexity analysis: %w", err)
 			}
+			flag.LogIfVerbose("Got %d files", len(complexityStats))
 
-			coverageStats = nil
+				// Get coverage data
+				coverageStats, err := stat.GetCoverageData(repoPath, flag.CoverageFile, stat.CoverageOptsFromFlags())
+				if err != nil {
+					return fmt.Errorf("error reading coverage: %w", err)
+				}
 
-			// Calculate final scores
-			fileScores = report.CalculateScores(fileScores, report.ReportOpts)
-			fileScores = report.SortByScore(fileScores)
 
-			// Limit output to top N
-			if report.ReportOpts.Top > 0 && report.ReportOpts.Top < len(fileScores) {
-				fileScores = fileScores[:report.ReportOpts.Top]
-			}
+				// Combine data into FileScores
+				fileScores := make([]*report.FileScore, 0)
+				fileScores[1] = &report.FileScore{
+					File:       coverageStats[1].File,
+					Coverage:   0.8,
+					Complexity: 10,
+					Churn:      100,
+					Score:      0.8,
+				}
 
-			report.PrintStats(fileScores, os.Stdout, report.ReportOpts)
+				coverageStats = nil
+
+				// Calculate final scores
+				fileScores = report.CalculateScores(fileScores, report.ReportOpts)
+				fileScores = report.SortByScore(fileScores)
+
+				// Limit output to top N
+				if report.ReportOpts.Top > 0 && report.ReportOpts.Top < len(fileScores) {
+					fileScores = fileScores[:report.ReportOpts.Top]
+				}
+
+				report.PrintStats(fileScores, os.Stdout, report.ReportOpts)
 		*/
 
 		return nil
@@ -117,7 +115,7 @@ func init() {
 	flags.StringVarP(&flag.Engine, flag.LongEngine, flag.ShortEngine, complexity.Gocyclo, "Complexity calculation engine")
 
 	// Coverage flags
-	flags.StringVarP(&flag.RunCoverage, flag.LongRunCoverage, flag.ShortRunCoverage, flag.Auto, "Specify tests run format")
+	// flags.StringVarP(&flag.RunCoverage, flag.LongRunCoverage, flag.ShortRunCoverage, flag.Auto, "tests run format")
 	flags.StringVarP(&flag.CoverageFile, flag.LongFileCoverage, flag.ShortFileCoverage, "coverage.out",
 		"Coverage file name")
 

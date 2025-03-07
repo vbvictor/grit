@@ -5,12 +5,15 @@ linters:
     - godox
     - gci
     - tenv
-    - testpackage 
-    - exhaustruct
+    - gomnd
+    - testpackage
     - gochecknoglobals # store global configuration values
     - forbidigo # use printf for showing progress information and verbose output
     - gochecknoinits # init functions to setup cobra commands
     - nolintlint
+    - exhaustruct
+    - execinquery # deprecated
+    - exportloopref # deprecated
 linters-settings:
   gocritic:
     enable-all: true

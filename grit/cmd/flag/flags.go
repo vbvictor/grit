@@ -33,7 +33,6 @@ var (
 	ChurnFactor      float64
 	ComplexityFactor float64
 	CoverageFactor   float64
-	RunCoverage      string
 	CoverageFile     string
 
 	// Output format flags.
