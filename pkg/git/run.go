@@ -63,7 +63,6 @@ type ChurnOptions struct {
 	Extensions   map[string]struct{}
 	Since        time.Time
 	Until        time.Time
-	OutputFormat flag.OutputType
 }
 
 type ChurnChunk struct {
@@ -72,6 +71,57 @@ type ChurnChunk struct {
 	Added   int    `json:"additions"`
 	Removed int    `json:"deletions"`
 	Commits int    `json:"commits"`
+}
+
+func PopulateOpts(opts *ChurnOptions, extensionList []string,
+	since         string,
+	until         string,
+	repoPath      string) error {
+	opts.Path = repoPath
+
+	if err := setSinceOpt(opts, since); err != nil {
+		return fmt.Errorf("error setting since option: %w", err)
+	}
+
+	if err := setUntilOpt(opts, until); err != nil {
+		return fmt.Errorf("error setting until option: %w", err)
+	}
+
+	if extensionList != nil {
+		opts.Extensions = flag.GetExtMap(extensionList)
+	}
+
+	return nil
+}
+
+func setSinceOpt(opts *ChurnOptions, since string) error {
+	if since != "" {
+		var err error
+
+		opts.Since, err = time.Parse(time.DateOnly, since)
+		if err != nil {
+			return fmt.Errorf("error parsing since date: %w", err)
+		}
+	} else {
+		opts.Since = time.Now().AddDate(-1, 0, 0)
+	}
+
+	return nil
+}
+
+func setUntilOpt(opts *ChurnOptions, until string) error {
+	if until != "" {
+		var err error
+
+		opts.Until, err = time.Parse(time.DateOnly, until)
+		if err != nil {
+			return fmt.Errorf("error parsing until date: %w", err)
+		}
+	} else {
+		opts.Until = time.Now()
+	}
+
+	return nil
 }
 
 func ReadGitChurn(repoPath string, opts *ChurnOptions) ([]*ChurnChunk, error) {
@@ -228,7 +278,7 @@ func SortAndLimit(result []*ChurnChunk, sortBy SortType, limit int) []*ChurnChun
 	sort.Slice(result, less)
 
 	// Limit the number of results
-	if limit >= 0 && len(result) > limit {
+	if limit > 0 && len(result) > limit {
 		result = result[:limit]
 	}
 

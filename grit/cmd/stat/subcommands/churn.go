@@ -17,7 +17,6 @@ var churnOpts = &git.ChurnOptions{
 	Extensions:   nil,
 	Since:        time.Time{},
 	Until:        time.Time{},
-	OutputFormat: flag.JSON,
 	Path:         "",
 	ExcludePath:  "",
 }
@@ -42,7 +41,7 @@ var ChurnCmd = &cobra.Command{ //nolint:exhaustruct // no need to set all fields
 
 		flag.LogIfVerbose("Processing repository: %s\n", repoPath)
 
-		if err := populateOptsFromFlags(); err != nil {
+		if err := git.PopulateOpts(churnOpts, extensionList, since, until, repoPath); err != nil {
 			return fmt.Errorf("failed to create options: %w", err)
 		}
 
@@ -72,52 +71,4 @@ func init() {
 
 	ChurnCmd.Flag(flag.LongUntil).DefValue = flag.DefaultUntil
 	ChurnCmd.Flag(flag.LongSince).DefValue = flag.DefaultSince
-}
-
-func populateOptsFromFlags() error {
-	churnOpts.Path = repoPath
-
-	if err := setSinceOpt(churnOpts, since); err != nil {
-		return fmt.Errorf("error setting since option: %w", err)
-	}
-
-	if err := setUntilOpt(churnOpts, until); err != nil {
-		return fmt.Errorf("error setting until option: %w", err)
-	}
-
-	if flag.Extensions != nil {
-		churnOpts.Extensions = flag.GetExtMap(flag.Extensions)
-	}
-
-	return nil
-}
-
-func setSinceOpt(opts *git.ChurnOptions, since string) error {
-	if since != "" {
-		var err error
-
-		opts.Since, err = time.Parse(time.DateOnly, since)
-		if err != nil {
-			return fmt.Errorf("error parsing since date: %w", err)
-		}
-	} else {
-		opts.Since = time.Now().AddDate(-1, 0, 0)
-	}
-
-	return nil
-}
-
-func setUntilOpt(opts *git.ChurnOptions, until string) error {
-	if until != "" {
-		var err error
-
-		opts.Until, err = time.Parse(time.DateOnly, until)
-		if err != nil {
-			return fmt.Errorf("error parsing until date: %w", err)
-		}
-	} else {
-		opts.Until = time.Now()
-	}
-
-	return nil
 }

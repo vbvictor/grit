@@ -20,14 +20,6 @@ type Options struct {
 	ExcludePath      string
 }
 
-var ReportOpts = Options{
-	Top:              defaultTop,
-	ExcludePath:      "",
-	ChurnFactor:      1.0,
-	ComplexityFactor: 1.0,
-	CoverageFactor:   1.0,
-}
-
 type scoreFunc func(*FileScore)
 
 func CalculateScores(data []*FileScore, opts Options) []*FileScore {

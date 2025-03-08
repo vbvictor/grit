@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/vbvictor/grit/grit/cmd/flag"
+	"github.com/vbvictor/grit/grit/cmd/report"
 	"github.com/vbvictor/grit/grit/cmd/stat"
 )
 
@@ -37,4 +38,5 @@ func init() {
 	gritCmd.Root().CompletionOptions.DisableDefaultCmd = true
 
 	gritCmd.AddCommand(stat.StatCmd)
+	gritCmd.AddCommand(report.ReportCmd)
 }

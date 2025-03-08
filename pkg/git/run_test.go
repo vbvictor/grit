@@ -82,7 +82,7 @@ func TestSortAndLimitLimits(t *testing.T) {
 		{
 			name:     "limit 0",
 			limit:    0,
-			expected: []string{},
+			expected: []string{"file3.go", "file1.go", "file2.go", "file4.go"},
 		},
 		{
 			name:     "limit negative",

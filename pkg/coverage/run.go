@@ -36,9 +36,51 @@ type FileCoverage struct {
 }
 
 type Options struct {
-	SortBy      SortType
-	Top         int
-	ExcludePath string
+	SortBy           SortType
+	Top              int
+	ExcludePath      string
+	RunCoverage      string
+	CoverageFilename string
+}
+
+func GetCoverageData(repoPath string, coverageOpts Options) ([]*FileCoverage, error) {
+	coveragePath := filepath.Join(repoPath, coverageOpts.CoverageFilename)
+
+	_, err := os.Stat(coveragePath)
+	if os.IsNotExist(err) {
+		flag.LogIfVerbose("Coverage file %s not found\n", coveragePath)
+
+		if coverageOpts.RunCoverage != flag.Never {
+			flag.LogIfVerbose("Running test suite\n\n")
+
+			if err = RunCoverage(repoPath, coverageOpts.CoverageFilename); err != nil {
+				return nil, errors.Join(flag.ErrRunCoverage, err)
+			}
+
+			flag.LogIfVerbose("Coverage file %s created\n", coveragePath)
+		} else {
+			flag.LogIfVerbose("Go test did not run since flag run='Never'\n")
+
+			return nil, errors.Join(flag.ErrCoverageNotFound, err)
+		}
+	} else if coverageOpts.RunCoverage == flag.Always {
+		flag.LogIfVerbose("Removing previous test coverage file %s\n", coveragePath)
+		os.Remove(coveragePath)
+		flag.LogIfVerbose("Running test suite\n\n")
+
+		if err = RunCoverage(repoPath, coverageOpts.CoverageFilename); err != nil {
+			return nil, errors.Join(flag.ErrRunCoverage, err)
+		}
+
+		flag.LogIfVerbose("Coverage file %s created\n", coveragePath)
+	}
+
+	covData, err := ReadCoverage(filepath.Join(repoPath, coverageOpts.CoverageFilename), coverageOpts)
+	if err != nil {
+		return nil, errors.Join(flag.ErrReadCoverage, err)
+	}
+
+	return covData, nil
 }
 
 func ReadCoverage(coverageFile string, _ Options) ([]*FileCoverage, error) {
@@ -95,7 +137,7 @@ func SortAndLimit(result []*FileCoverage, sortBy SortType, limit int) []*FileCov
 
 	sort.Slice(result, less)
 
-	if limit >= 0 && len(result) > limit {
+	if limit > 0 && len(result) > limit {
 		return result[:limit]
 	}
 
@@ -103,8 +145,12 @@ func SortAndLimit(result []*FileCoverage, sortBy SortType, limit int) []*FileCov
 }
 
 func RunCoverage(repoPath, coverageFile string) error {
-	coverageArg := filepath.Join(repoPath, "...")
-	cmd := exec.Command("go", "test", coverageArg, "-coverprofile="+coverageFile)
+	cmd := exec.Command( //nolint:gosec // go test is allowed command
+		"go",
+		"test",
+		filepath.Join(repoPath, "..."),
+		"-v",
+		"-coverprofile="+coverageFile)
 
 	flag.LogIfVerbose("Running command: %s\n", cmd.String())
 
