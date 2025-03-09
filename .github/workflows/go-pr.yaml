@@ -27,15 +27,6 @@ jobs:
       uses: vladopajic/go-test-coverage@v2
       with:
         config: ./.testcoverage.yml
-
-    # Coverage report for PR
-    - name: Is report present
-      uses: peter-evans/find-comment@v3
-      id: fc
-      with:
-        issue-number: ${{ github.event.pull_request.number }}
-        comment-author: 'github-actions[bot]'
-        body-includes: 'go-test-coverage report:'
     
     - name: Post coverage report
       uses: peter-evans/create-or-update-comment@v4
