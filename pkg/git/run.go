@@ -56,13 +56,13 @@ func (d *Date) Set(value string) error {
 }
 
 type ChurnOptions struct {
-	SortBy       SortType
-	Top          int
-	Path         string
-	ExcludePath  string
-	Extensions   map[string]struct{}
-	Since        time.Time
-	Until        time.Time
+	SortBy      SortType
+	Top         int
+	Path        string
+	ExcludePath string
+	Extensions  map[string]struct{}
+	Since       time.Time
+	Until       time.Time
 }
 
 type ChurnChunk struct {
@@ -74,9 +74,10 @@ type ChurnChunk struct {
 }
 
 func PopulateOpts(opts *ChurnOptions, extensionList []string,
-	since         string,
-	until         string,
-	repoPath      string) error {
+	since string,
+	until string,
+	repoPath string,
+) error {
 	opts.Path = repoPath
 
 	if err := setSinceOpt(opts, since); err != nil {

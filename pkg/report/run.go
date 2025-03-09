@@ -10,8 +10,6 @@ type FileScore struct {
 	Score      float64
 }
 
-const defaultTop = 10
-
 type Options struct {
 	ChurnFactor      float64
 	ComplexityFactor float64

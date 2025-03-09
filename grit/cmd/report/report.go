@@ -23,6 +23,10 @@ func (e *factorError) Error() string {
 	return fmt.Sprintf("%s factor is lower that 0: %f", e.factor, e.value)
 }
 
+const (
+	DefaultTop = 10
+)
+
 var (
 	excludeRegex string
 	top          int
@@ -56,7 +60,7 @@ var coverageOpts = coverage.Options{
 }
 
 var reportOpts = report.Options{
-	Top:              10,
+	Top:              DefaultTop,
 	ExcludePath:      "",
 	ChurnFactor:      1.0,
 	ComplexityFactor: 1.0,
@@ -72,7 +76,8 @@ var ReportCmd = &cobra.Command{
 		return validateFactors(&reportOpts)
 	},
 	RunE: func(_ *cobra.Command, args []string) error {
-		repoPath, err := filepath.Abs(args[0])
+		var err error
+		repoPath, err = filepath.Abs(args[0])
 		if err != nil {
 			return errors.Join(&flag.AbsRepoPathError{Path: args[0]}, err)
 		}
@@ -149,7 +154,8 @@ func init() {
 	flags.StringVarP(&until, flag.LongUntil, flag.ShortUntil, "", "End date for analysis (YYYY-MM-DD)")
 
 	// Complexity flags
-	flags.StringVarP(&complexityOpts.Engine, flag.LongEngine, flag.ShortEngine, complexity.Gocyclo, "Complexity calculation engine")
+	flags.StringVarP(&complexityOpts.Engine, flag.LongEngine, flag.ShortEngine, complexity.Gocyclo,
+		"Complexity calculation engine")
 
 	// Coverage flags
 	flags.StringVarP(&coverageOpts.RunCoverage, flag.LongRunCoverage, flag.ShortRunCoverage, flag.Auto, "tests run format")

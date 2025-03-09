@@ -12,13 +12,13 @@ import (
 )
 
 var churnOpts = &git.ChurnOptions{
-	SortBy:       git.Changes,
-	Top:          git.DefaultTop,
-	Extensions:   nil,
-	Since:        time.Time{},
-	Until:        time.Time{},
-	Path:         "",
-	ExcludePath:  "",
+	SortBy:      git.Changes,
+	Top:         git.DefaultTop,
+	Extensions:  nil,
+	Since:       time.Time{},
+	Until:       time.Time{},
+	Path:        "",
+	ExcludePath: "",
 }
 
 var (

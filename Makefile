@@ -23,7 +23,7 @@ clean:
 	rm -f coverage.out
 
 lint:
-	golangci-lint run
+	golangci-lint run --fix
 
 format:
 	gofumpt -w .

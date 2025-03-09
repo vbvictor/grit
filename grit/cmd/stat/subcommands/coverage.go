@@ -12,10 +12,10 @@ import (
 )
 
 var coverageOpts = coverage.Options{
-	SortBy:      coverage.Worst,
-	Top:         10, //nolint:mnd // default value
-	ExcludePath: "",
-	RunCoverage: "",
+	SortBy:           coverage.Worst,
+	Top:              10, //nolint:mnd // default value
+	ExcludePath:      "",
+	RunCoverage:      "",
 	CoverageFilename: "coverage.out",
 }
 
@@ -48,7 +48,8 @@ func init() {
 	flags := CoverageCmd.PersistentFlags()
 
 	flags.StringVar(&coverageOpts.SortBy, flag.LongSort, coverage.Worst, "Specify sort type")
-	flags.StringVarP(&coverageOpts.RunCoverage, flag.LongRunCoverage, flag.ShortRunCoverage, flag.Auto, `Specify tests run format:
+	flags.StringVarP(&coverageOpts.RunCoverage, flag.LongRunCoverage, flag.ShortRunCoverage, flag.Auto,
+		`Specify tests run format:
 'Auto' will run unit tests if coverage file is not found
 'Always' will run unit tests on every invoke 'stat coverage'
 'Never' will never run unit tests and always look for present coverage file`)
