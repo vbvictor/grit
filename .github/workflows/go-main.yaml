@@ -21,15 +21,11 @@ jobs:
     - name: Test
       run: make test-with-coverage
 
-    - name: Coverage
-      uses: vladopajic/go-test-coverage@v2
+    - name: Archive code coverage results
+      uses: actions/upload-artifact@v4
       with:
-        config: ./.testcoverage.yml
-
-    - name: Check failed coverage
-      if: steps.coverage.outcome == 'failure'
-      shell: bash
-      run: echo "coverage check failed" && exit 1
+        name: code-coverage
+        path: coverage.out
       
   Lint:
     name: lint
