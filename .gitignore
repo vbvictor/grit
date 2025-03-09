@@ -7,6 +7,8 @@
 *.dll
 *.so
 *.dylib
+grit/grit.exe
+grit/grit
 
 # Test binary, built with `go test -c`
 *.test
@@ -23,3 +25,22 @@ go.work.sum
 
 # env file
 .env
+
+# IDE
+.vscode
+.idea
+
+# Development tmp folder
+dev_data
+test_data
+plots
+
+# Test results
+testdata/charts
+
+# Goreleaser
+dist
+
+# Go coverage
+coverage.out
+coverage.html

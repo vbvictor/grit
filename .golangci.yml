@@ -1,0 +1,36 @@
+linters:
+  enable-all: true
+  disable:
+    - depguard
+    - godox
+    - gci
+    - tenv
+    - testpackage
+    - gochecknoglobals # store global configuration values
+    - forbidigo # use printf for showing progress information and verbose output
+    - gochecknoinits # init functions to setup cobra commands
+    - nolintlint
+    - exhaustruct
+linters-settings:
+  gocritic:
+    enable-all: true
+    disabled-checks:
+      - commentedOutCode # disable in early pre 1.0.0 versions
+  funlen:
+    lines: 60
+    statements: 40
+    ignore-comments: true
+  paralleltest:
+    ignore-missing: true
+  nestif:
+    min-complexity: 8
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - funlen
+        - varnamelen
+        - dupl
+  exclude-dirs:
+    - testdata # test code directory

@@ -1,0 +1,88 @@
+version: 2
+
+project_name: grit
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - binary: grit
+    main: ./grit
+    env:
+      - CGO_ENABLED=0
+    goos:
+    - linux
+    - windows
+    - darwin
+    goarch:
+      - amd64
+      - arm64
+      - riscv64
+
+archives:
+  - format: tar.gz
+    wrap_in_directory: true
+    format_overrides:
+      - goos: windows
+        format: zip
+    name_template: '{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    files:
+      - LICENSE
+      - README.md
+
+snapshot:
+  version_template: SNAPSHOT-{{ .Commit }}
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - Merge pull request
+      - Merge branch
+
+source:
+  enabled: true
+  name_template: '{{ .ProjectName }}-{{ .Version }}-source'
+
+release:
+  github:
+    owner: vbvictor
+    name: grit
+  header: |
+    `grit` is a free and open-source cli tool that helps developers understand their codebase maintainability index.
+
+nfpms:
+  - id: grit-nfpms
+    package_name: grit
+    file_name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    homepage: https://github.com/vbvictor/grit
+    maintainer: "Victor Baranov <https://github.com/vbvictor>"
+    description: cli tool that helps developers understand their codebase maintainability index
+    license: MIT
+    section: golang
+    formats:
+      - deb
+      - rpm
+    umask: 0o022
+    overrides:
+      deb:
+        contents:
+          - src: LICENSE
+            dst: /usr/share/doc/grit/copyright
+          - src: README.md
+            dst: /usr/share/doc/grit/README.md
+        recommends:
+          - golang-go
+      rpm:
+        contents:
+          - src: LICENSE
+            dst: /usr/share/doc/grit/LICENSE
+          - src: README.md
+            dst: /usr/share/doc/grit/README.md
+        recommends:
+          - /usr/bin/go
+    rpm:
+      group: Development/Tools
