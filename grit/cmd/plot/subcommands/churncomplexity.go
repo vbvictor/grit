@@ -13,10 +13,9 @@ import (
 )
 
 var (
-	outputFile   string
-	excludeRegex string
-	since        string
-	until        string
+	outputFile string
+	since      string
+	until      string
 )
 
 var churnOpts = &git.ChurnOptions{
