@@ -19,7 +19,7 @@ var testData = []*ChurnChunk{
 func TestSortAndLimitTypes(t *testing.T) {
 	tests := []struct {
 		name     string
-		sortBy   SortType
+		sortBy   ChurnType
 		expected []string
 	}{
 		{

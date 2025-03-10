@@ -20,7 +20,7 @@ var coverageOpts = coverage.Options{
 }
 
 var CoverageCmd = &cobra.Command{ //nolint:exhaustruct // no need to set all fields
-	Use:   "coverage <path>",
+	Use:   "coverage [flags] <path>",
 	Short: "Finds files with the least unit-test coverage",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(_ *cobra.Command, args []string) error {
@@ -47,12 +47,14 @@ var CoverageCmd = &cobra.Command{ //nolint:exhaustruct // no need to set all fie
 func init() {
 	flags := CoverageCmd.PersistentFlags()
 
-	flags.StringVar(&coverageOpts.SortBy, flag.LongSort, coverage.Worst, "Specify sort type")
+	flags.StringVar(&coverageOpts.SortBy, flag.LongSort, coverage.Worst,
+		fmt.Sprintf("Specify sort type: [%s, %s]", coverage.Worst, coverage.Best))
 	flags.StringVarP(&coverageOpts.RunCoverage, flag.LongRunCoverage, flag.ShortRunCoverage, flag.Auto,
 		`Specify tests run format:
-'Auto' will run unit tests if coverage file is not found
-'Always' will run unit tests on every invoke 'stat coverage'
-'Never' will never run unit tests and always look for present coverage file`)
+  'Auto' will run unit tests if coverage file is not found
+  'Always' will run unit tests on every invoke 'coverage' command
+  'Never' will never run unit tests and always look for present test-coverage file
+`)
 	flags.StringVarP(&coverageOpts.CoverageFilename, flag.LongFileCoverage, flag.ShortFileCoverage, "coverage.out",
 		"Name of code coverage file to read or create")
 	flags.BoolVarP(&flag.Verbose, flag.LongVerbose, flag.ShortVerbose, false, "Enable verbose output")

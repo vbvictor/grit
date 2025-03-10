@@ -15,14 +15,14 @@ import (
 	"golang.org/x/exp/maps"
 )
 
-// SortType represents the type of sorting to be performed on the results of git log.
-type SortType = string
+// ChurnType represents the type of sorting to be performed on the results of git log.
+type ChurnType = string
 
 var (
-	Changes   SortType = "changes"
-	Additions SortType = "additions"
-	Deletions SortType = "deletions"
-	Commits   SortType = "commits"
+	Changes   ChurnType = "changes"
+	Additions ChurnType = "additions"
+	Deletions ChurnType = "deletions"
+	Commits   ChurnType = "commits"
 )
 
 const (
@@ -56,7 +56,7 @@ func (d *Date) Set(value string) error {
 }
 
 type ChurnOptions struct {
-	SortBy      SortType
+	SortBy      ChurnType
 	Top         int
 	Path        string
 	ExcludePath string
@@ -260,7 +260,7 @@ func shouldSkipFile(file string, opts *ChurnOptions) bool {
 	return false
 }
 
-func SortAndLimit(result []*ChurnChunk, sortBy SortType, limit int) []*ChurnChunk {
+func SortAndLimit(result []*ChurnChunk, sortBy ChurnType, limit int) []*ChurnChunk {
 	less := func() func(i, j int) bool {
 		switch sortBy {
 		case Changes:
