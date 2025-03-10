@@ -92,3 +92,22 @@ func (rm *RisksMapper) Style(category Category) opts.ItemStyle {
 
 	return opts.ItemStyle{}
 }
+
+// and assigns a purple color to all points.
+type NoopMapper struct{}
+
+var _ EntryMapper = (*NoopMapper)(nil)
+
+func (nm *NoopMapper) Map(_ ScatterData) Category {
+	return "Risk"
+}
+
+func (nm *NoopMapper) Style(_ Category) opts.ItemStyle {
+	return opts.ItemStyle{
+		Color: "#800080", // Purple color
+	}
+}
+
+func NewNoopMapper() *NoopMapper {
+	return &NoopMapper{}
+}

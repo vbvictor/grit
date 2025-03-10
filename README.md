@@ -12,7 +12,7 @@ refactoring and testing priorities.
 
 - [Go Refactoring Insight Tool](#go-refactoring-insight-tool)
   - [Table of contents](#table-of-contents)
-  - [What GRIT Measures](#what-grit-measures)
+  - [What GRIT can do](#what-grit-can-do)
   - [Getting Started](#getting-started)
   - [Usage](#usage)
     - [Help command](#help-command)
@@ -20,13 +20,13 @@ refactoring and testing priorities.
   - [Contributing](#contributing)
   - [License](#license)
 
-## What GRIT Measures
+## What GRIT can do
 
 <!-- - **Maintainability Score**: Combines metrics to rate maintainability index-->
-<!-- - **Visual Analytics**: Generates churn vs complexity graphs -->
 - **Code Churn**: Tracks how frequently files change over time.
 - **Code Complexity**: Calculates cyclomatic complexity metric per file.
 - **Test Coverage**: Analyzes test coverage percentage per file.
+- **Visual Analytics**: Generates churn vs complexity graphs.
 
 All these metrics are useful when making decisions about:
 
@@ -84,7 +84,7 @@ Each command has its own extensive description that can be accessed by running `
 - Features
   - [x] collect churn, complexity, coverage metrics
   - [ ] create maintainability report
-  - [ ] render churn vs complexity graph
+  - [x] render churn vs complexity graph
   - [ ] render churn vs complexity vs coverage graph
   - [ ] add more output formats
   - [ ] support custom files with metrics to supporting other languages
