@@ -159,7 +159,7 @@ func CreateScatterChart( //nolint:funlen // TODO(v.baranov): Refactor
 
 // Skip file if it is not found in chunk or files, first goes over all churns
 // Matches based on filename.
-func PreparePlotData(files []*complexity.FileStat, churns []*git.ChurnChunk) []ScatterEntry {
+func PreparePlotData(files []*complexity.FileStat, churns []*git.ChurnChunk, churnType git.ChurnType) []ScatterEntry {
 	result := make([]ScatterEntry, 0)
 
 	// Create map for quick churn lookup
@@ -180,10 +180,10 @@ func PreparePlotData(files []*complexity.FileStat, churns []*git.ChurnChunk) []S
 			ScatterData: ScatterData{Complexity: fileComplexity.AvgComplexity, Churn: 0},
 		}
 
-		switch Plot {
-		case Commits:
+		switch churnType {
+		case git.Commits:
 			entry.Churn = churn.Commits
-		case Changes:
+		case git.Changes:
 			entry.Churn = churn.Churn
 		default:
 			panic("Unknown plot type")
@@ -194,12 +194,3 @@ func PreparePlotData(files []*complexity.FileStat, churns []*git.ChurnChunk) []S
 
 	return result
 }
-
-type ScatterOXType = string
-
-const (
-	Commits ScatterOXType = "commits"
-	Changes ScatterOXType = "changes"
-)
-
-var Plot = Commits

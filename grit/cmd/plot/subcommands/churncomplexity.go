@@ -16,6 +16,7 @@ var (
 	outputFile string
 	since      string
 	until      string
+	churnType  git.ChurnType
 )
 
 var churnOpts = &git.ChurnOptions{
@@ -74,7 +75,7 @@ Open generated file '.html' in a browser to view the graph.`,
 
 		flag.LogIfVerbose("Got %d complexity files\n", len(complexityStats))
 
-		plotEntries := plot.PreparePlotData(complexityStats, churns)
+		plotEntries := plot.PreparePlotData(complexityStats, churns, churnType)
 
 		if err := plot.CreateScatterChart(plotEntries, plot.NewNoopMapper(), outputFile); err != nil {
 			return fmt.Errorf("error creating chart: %w", err)
@@ -93,12 +94,12 @@ func init() {
 	flags.BoolVarP(&flag.Verbose, flag.LongVerbose, flag.ShortVerbose, false, "Show detailed progress")
 	flags.StringVarP(&outputFile, "output", "o", "complexity_churn.html", "Output graph file name")
 
-	flags.StringVarP(&plot.Plot, "plot-type", "t", git.Commits,
-		fmt.Sprintf("Specify churn type: [%s, %s, %s, %s]", git.Changes, git.Additions, git.Deletions, git.Commits))
+	flags.StringVarP(&churnType, "churn-type", "t", git.Commits,
+		fmt.Sprintf("Specify churn type for plotting: [%s, %s]", git.Changes, git.Commits))
 
 	// Churn flags
-	flags.StringVarP(&since, flag.LongSince, flag.ShortSince, "", "Start date for churn analysis (YYYY-MM-DD)")
-	flags.StringVarP(&until, flag.LongUntil, flag.ShortUntil, "", "End date for churn analysis (YYYY-MM-DD)")
+	flags.StringVarP(&since, flag.LongSince, flag.ShortSince, "", "Start date for analysis in format 'YYYY-MM-DD'")
+	flags.StringVarP(&until, flag.LongUntil, flag.ShortUntil, "", "End date for analysis in format 'YYYY-MM-DD'")
 
 	// Complexity flags
 	flags.StringVarP(&complexityOpts.Engine, flag.LongEngine, flag.ShortEngine, complexity.Gocyclo,

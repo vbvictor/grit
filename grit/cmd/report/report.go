@@ -150,8 +150,8 @@ func init() {
 	flags.BoolVarP(&flag.Verbose, flag.LongVerbose, flag.ShortVerbose, false, "Show detailed progress")
 
 	// Churn flags
-	flags.StringVarP(&since, flag.LongSince, flag.ShortSince, "", "Start date for analysis (YYYY-MM-DD)")
-	flags.StringVarP(&until, flag.LongUntil, flag.ShortUntil, "", "End date for analysis (YYYY-MM-DD)")
+	flags.StringVarP(&since, flag.LongSince, flag.ShortSince, "", "Start date for analysis in format 'YYYY-MM-DD'")
+	flags.StringVarP(&until, flag.LongUntil, flag.ShortUntil, "", "End date for analysis in format 'YYYY-MM-DD'")
 
 	// Complexity flags
 	flags.StringVarP(&complexityOpts.Engine, flag.LongEngine, flag.ShortEngine, complexity.Gocyclo,

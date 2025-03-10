@@ -29,7 +29,7 @@ var (
 )
 
 var ChurnCmd = &cobra.Command{ //nolint:exhaustruct // no need to set all fields
-	Use:   "churn <path>",
+	Use:   "churn [flags] <repository>",
 	Short: "Finds files with the most changes in git repository",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(_ *cobra.Command, args []string) error {
@@ -59,15 +59,15 @@ var ChurnCmd = &cobra.Command{ //nolint:exhaustruct // no need to set all fields
 func init() {
 	flags := ChurnCmd.PersistentFlags()
 
-	flags.StringVar(&churnOpts.SortBy, flag.LongSort, "commits",
-		fmt.Sprintf("Sort by: %s, %s, %s, %s", git.Changes, git.Additions, git.Deletions, git.Commits))
+	flags.StringVar(&churnOpts.SortBy, flag.LongSort, git.Commits,
+		fmt.Sprintf("Specify churn sort type: [%s, %s, %s, %s]", git.Changes, git.Additions, git.Deletions, git.Commits))
 	flags.IntVarP(&churnOpts.Top, flag.LongTop, flag.ShortTop, git.DefaultTop, "Number of top files to display")
 	flags.BoolVarP(&flag.Verbose, flag.LongVerbose, flag.ShortVerbose, false, "Show detailed progress")
 	flags.StringVar(&churnOpts.ExcludePath, flag.LongExclude, "", "Exclude files matching regex pattern")
 	flags.StringSliceVarP(&extensionList, flag.LongExtensions, flag.ShortExt, nil,
-		"Only include files with given extensions in comma-separated list. For example go,h,c")
-	flags.StringVarP(&since, flag.LongSince, flag.ShortSince, "", "Start date for analysis (YYYY-MM-DD)")
-	flags.StringVarP(&until, flag.LongUntil, flag.ShortUntil, "", "End date for analysis (YYYY-MM-DD)")
+		"Only include files with given extensions in comma-separated list, e.g. 'go,h,c'")
+	flags.StringVarP(&since, flag.LongSince, flag.ShortSince, "", "Start date for analysis in format 'YYYY-MM-DD'")
+	flags.StringVarP(&until, flag.LongUntil, flag.ShortUntil, "", "End date for analysis in format 'YYYY-MM-DD'")
 
 	ChurnCmd.Flag(flag.LongUntil).DefValue = flag.DefaultUntil
 	ChurnCmd.Flag(flag.LongSince).DefValue = flag.DefaultSince

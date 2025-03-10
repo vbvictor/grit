@@ -40,9 +40,9 @@ var (
 	AvailableOutputFormats            = []OutputType{JSON, Tabular}
 
 	// Coverage Run formats.
-	Always = "always"
-	Never  = "never"
-	Auto   = "auto"
+	Always = "Always"
+	Never  = "Never"
+	Auto   = "Auto"
 
 	OutputFormat OutputType
 )
