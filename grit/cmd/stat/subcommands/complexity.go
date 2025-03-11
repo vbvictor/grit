@@ -12,10 +12,12 @@ import (
 )
 
 var complexityOpts = complexity.Options{
-	Engine:      complexity.Gocyclo,
-	ExcludePath: "",
-	Top:         10, //nolint:mnd // default value
+	Engine:       complexity.Gocyclo,
+	ExcludeRegex: nil,
+	Top:          10, //nolint:mnd // default value
 }
+
+var excludeComplexityRegex string
 
 var ComplexityCmd = &cobra.Command{ //nolint:exhaustruct // no need to set all fields
 	Use:   "complexity [flags] <path>",
@@ -29,7 +31,11 @@ var ComplexityCmd = &cobra.Command{ //nolint:exhaustruct // no need to set all f
 
 		flag.LogIfVerbose("Processing repository: %s\n", repoPath)
 
-		fileStat, err := complexity.RunComplexity(repoPath, complexityOpts)
+		if err := complexity.PopulateOpts(&complexityOpts, excludeComplexityRegex); err != nil {
+			return fmt.Errorf("failed to create options: %w", err)
+		}
+
+		fileStat, err := complexity.RunComplexity(repoPath, &complexityOpts)
 		if err != nil {
 			return fmt.Errorf("error running complexity analysis: %w", err)
 		}
@@ -49,5 +55,5 @@ func init() {
 		fmt.Sprintf("Specify complexity calculation engine: [%s, %s]", complexity.Gocyclo, complexity.Gocognit))
 	flags.IntVarP(&complexityOpts.Top, flag.LongTop, flag.ShortTop, git.DefaultTop, "Number of top files to display")
 	flags.BoolVarP(&flag.Verbose, flag.LongVerbose, flag.ShortVerbose, false, "Show detailed progress")
-	flags.StringVar(&complexityOpts.ExcludePath, flag.LongExclude, "", "Exclude files matching regex pattern")
+	flags.StringVar(&excludeComplexityRegex, flag.LongExclude, "", "Exclude files matching regex pattern")
 }

@@ -2,6 +2,7 @@ package complexity
 
 import (
 	"path/filepath"
+	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -13,6 +14,7 @@ func TestRunGocyclo(t *testing.T) {
 		name          string
 		directory     string
 		expectedFiles map[string]ExpectedFile
+		excludeRegex  *regexp.Regexp
 	}{
 		{
 			name:          "Empty directory",
@@ -82,6 +84,34 @@ func TestRunGocyclo(t *testing.T) {
 			},
 		},
 		{
+			name:         "Exclude regex",
+			directory:    "nested",
+			excludeRegex: regexp.MustCompile(`file1\.go$|morelevel2`),
+			expectedFiles: map[string]ExpectedFile{
+				"main.go": {
+					Functions: map[string]TestFunction{
+						"BaseFunction":    {1, 3, "nested", "main.go"},
+						"SimpleCondition": {2, 7, "nested", "main.go"},
+					},
+					AvgComplexity: 1.5,
+				},
+				filepath.Join("level1", "level2", "file2.go"): {
+					Functions: map[string]TestFunction{
+						"Func3": {4, 3, "level2", filepath.Join("level1", "level2", "file2.go")},
+						"Func4": {5, 15, "level2", filepath.Join("level1", "level2", "file2.go")},
+					},
+					AvgComplexity: 4.5,
+				},
+				filepath.Join("level1", "level2", "file3.go"): {
+					Functions: map[string]TestFunction{
+						"NestedLoopsWithConditions": {5, 3, "level2", filepath.Join("level1", "level2", "file3.go")},
+						"SwitchWithLoops":           {6, 17, "level2", filepath.Join("level1", "level2", "file3.go")},
+					},
+					AvgComplexity: 5.5,
+				},
+			},
+		},
+		{
 			name:      "Mixed complexity functions",
 			directory: "mixed",
 			expectedFiles: map[string]ExpectedFile{
@@ -112,7 +142,7 @@ func TestRunGocyclo(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			testPath := filepath.Join(".", "..", "..", "testdata", "complexity", "gocode", tt.directory)
-			result, err := RunGocyclo(testPath, Options{})
+			result, err := RunGocyclo(testPath, &Options{ExcludeRegex: tt.excludeRegex})
 
 			require.NoError(t, err)
 			assert.Len(t, result, len(tt.expectedFiles))

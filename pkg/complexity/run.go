@@ -2,6 +2,8 @@ package complexity
 
 import (
 	"errors"
+	"fmt"
+	"regexp"
 	"slices"
 )
 
@@ -28,14 +30,27 @@ type FunctionStat struct {
 }
 
 type Options struct {
-	Engine      string
-	ExcludePath string
-	Top         int
+	Engine       string
+	ExcludeRegex *regexp.Regexp
+	Top          int
 }
 
 var ErrUnsupportedEngine = errors.New("unsupported complexity engine")
 
-func RunComplexity(repoPath string, opts Options) ([]*FileStat, error) {
+func PopulateOpts(opts *Options, excludeRegex string) error {
+	if excludeRegex != "" {
+		var err error
+
+		opts.ExcludeRegex, err = regexp.Compile(excludeRegex)
+		if err != nil {
+			return fmt.Errorf("invalid exclude pattern: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func RunComplexity(repoPath string, opts *Options) ([]*FileStat, error) {
 	switch opts.Engine {
 	case Gocyclo:
 		return RunGocyclo(repoPath, opts)

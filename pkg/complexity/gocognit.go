@@ -6,24 +6,12 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/uudashr/gocognit"
 )
 
-func RunGocognit(repoPath string, opts Options) ([]*FileStat, error) { //nolint:funlen,cyclop // TODO: refactor later
-	var excludeRegex *regexp.Regexp
-
-	if opts.ExcludePath != "" {
-		var err error
-
-		excludeRegex, err = regexp.Compile(opts.ExcludePath)
-		if err != nil {
-			return nil, fmt.Errorf("invalid exclude pattern: %w", err)
-		}
-	}
-
+func RunGocognit(repoPath string, opts *Options) ([]*FileStat, error) { //nolint:funlen,cyclop // TODO: refactor later
 	fileMap := make(map[string][]FunctionStat)
 
 	err := filepath.Walk(repoPath, func(path string, _ os.FileInfo, err error) error {
@@ -31,7 +19,7 @@ func RunGocognit(repoPath string, opts Options) ([]*FileStat, error) { //nolint:
 			return fmt.Errorf("failed to walk path: %w", err)
 		}
 
-		if excludeRegex != nil && excludeRegex.MatchString(path) {
+		if opts.ExcludeRegex != nil && opts.ExcludeRegex.MatchString(path) {
 			return nil
 		}
 

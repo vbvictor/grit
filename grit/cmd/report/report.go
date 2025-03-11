@@ -36,25 +36,25 @@ var (
 )
 
 var churnOpts = &git.ChurnOptions{
-	SortBy:      git.Changes,
-	Top:         0,
-	Extensions:  nil,
-	Since:       time.Time{},
-	Until:       time.Time{},
-	Path:        "",
-	ExcludePath: "",
+	SortBy:       git.Changes,
+	Top:          0,
+	Extensions:   nil,
+	Since:        time.Time{},
+	Until:        time.Time{},
+	Path:         "",
+	ExcludeRegex: nil,
 }
 
-var complexityOpts = complexity.Options{
-	Engine:      complexity.Gocyclo,
-	ExcludePath: "",
-	Top:         0, //nolint:mnd // default value
+var complexityOpts = &complexity.Options{
+	Engine:       complexity.Gocyclo,
+	ExcludeRegex: nil,
+	Top:          0, //nolint:mnd // default value
 }
 
-var coverageOpts = coverage.Options{
+var coverageOpts = &coverage.Options{
 	SortBy:           coverage.Worst,
 	Top:              0, //nolint:mnd // default value
-	ExcludePath:      "",
+	ExcludeRegex:     nil,
 	RunCoverage:      flag.Auto,
 	CoverageFilename: "coverage.out",
 }
@@ -85,7 +85,7 @@ var ReportCmd = &cobra.Command{
 		flag.LogIfVerbose("Processing directory: %s\n", repoPath)
 
 		flag.LogIfVerbose("Analyzing churn data...\n")
-		if err := git.PopulateOpts(churnOpts, []string{"go"}, since, until, repoPath); err != nil {
+		if err := git.PopulateOpts(churnOpts, []string{"go"}, since, until, repoPath, excludeRegex); err != nil {
 			return fmt.Errorf("failed to create options: %w", err)
 		}
 

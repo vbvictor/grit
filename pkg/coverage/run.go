@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"sort"
 
 	"github.com/vbvictor/grit/grit/cmd/flag"
@@ -38,12 +39,25 @@ type FileCoverage struct {
 type Options struct {
 	SortBy           SortType
 	Top              int
-	ExcludePath      string
+	ExcludeRegex     *regexp.Regexp
 	RunCoverage      string
 	CoverageFilename string
 }
 
-func GetCoverageData(repoPath string, coverageOpts Options) ([]*FileCoverage, error) {
+func PopulateOpts(opts *Options, excludeRegex string) error {
+	if excludeRegex != "" {
+		var err error
+
+		opts.ExcludeRegex, err = regexp.Compile(excludeRegex)
+		if err != nil {
+			return fmt.Errorf("invalid exclude pattern: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func GetCoverageData(repoPath string, coverageOpts *Options) ([]*FileCoverage, error) {
 	coveragePath := filepath.Join(repoPath, coverageOpts.CoverageFilename)
 
 	_, err := os.Stat(coveragePath)
@@ -83,7 +97,7 @@ func GetCoverageData(repoPath string, coverageOpts Options) ([]*FileCoverage, er
 	return covData, nil
 }
 
-func ReadCoverage(coverageFile string, _ Options) ([]*FileCoverage, error) {
+func ReadCoverage(coverageFile string, opts *Options) ([]*FileCoverage, error) {
 	profiles, err := cover.ParseProfiles(coverageFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse profiles data: %w", err)
@@ -92,6 +106,10 @@ func ReadCoverage(coverageFile string, _ Options) ([]*FileCoverage, error) {
 	results := make([]*FileCoverage, 0)
 
 	for _, profile := range profiles {
+		if opts.ExcludeRegex != nil && opts.ExcludeRegex.MatchString(profile.FileName) {
+			continue
+		}
+
 		total := 0
 		covered := 0
 
