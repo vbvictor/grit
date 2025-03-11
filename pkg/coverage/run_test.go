@@ -2,11 +2,27 @@ package coverage
 
 import (
 	"os"
+	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func createTempFile(t *testing.T, content string) *os.File {
+	t.Helper()
+
+	tmpfile, err := os.CreateTemp(t.TempDir(), "coverage.*.out")
+	require.NoError(t, err, "Failed to create temp file")
+
+	_, err = tmpfile.WriteString(content)
+	require.NoError(t, err, "Failed to write to temp file")
+
+	err = tmpfile.Close()
+	require.NoError(t, err, "Failed to close temp file")
+
+	return tmpfile
+}
 
 func TestReadCoverage(t *testing.T) {
 	tests := []struct {
@@ -52,17 +68,10 @@ example.com/pkg/file1.go:10.20,30.2 3 1`,
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tmpfile, err := os.CreateTemp(t.TempDir(), "coverage.*.out")
-			require.NoError(t, err, "Failed to create temp file")
+			tmpfile := createTempFile(t, tt.content)
 			defer os.Remove(tmpfile.Name())
 
-			_, err = tmpfile.WriteString(tt.content)
-			require.NoError(t, err, "Failed to write to temp file")
-
-			err = tmpfile.Close()
-			require.NoError(t, err, "Failed to close temp file")
-
-			got, err := ReadCoverage(tmpfile.Name(), Options{Top: 10, SortBy: Worst, ExcludePath: ""})
+			got, err := ReadCoverage(tmpfile.Name(), &Options{Top: 10, SortBy: Worst, ExcludeRegex: nil})
 
 			if tt.wantErr != nil {
 				require.ErrorIs(t, err, tt.wantErr)
@@ -70,6 +79,92 @@ example.com/pkg/file1.go:10.20,30.2 3 1`,
 
 				return
 			}
+
+			require.NoError(t, err)
+			require.Equal(t, len(tt.want), len(got), "Results length mismatch")
+
+			for i, want := range tt.want {
+				assert.Contains(t, got, want, "Result mismatch at index %d", i)
+			}
+		})
+	}
+}
+
+func TestExcludeRegex(t *testing.T) {
+	tests := []struct {
+		name         string
+		excludeRegex *regexp.Regexp
+		content      string
+		want         []*FileCoverage
+	}{
+		{
+			name:         "exclude simple",
+			excludeRegex: regexp.MustCompile(`vendor/`),
+			content: `mode: set
+example.com/pkg/file1.go:10.20,30.2 3 1
+example.com/vendor/file2.go:5.20,8.2 2 1
+example.com/cmd/app.go:15.30,20.2 3 1`,
+			want: []*FileCoverage{
+				{
+					File:       "example.com/pkg/file1.go",
+					Coverage:   100.0,
+					Statements: 3,
+					Covered:    3,
+				},
+				{
+					File:       "example.com/cmd/app.go",
+					Coverage:   100.0,
+					Statements: 3,
+					Covered:    3,
+				},
+			},
+		},
+		{
+			name:         "exclude many patterns",
+			excludeRegex: regexp.MustCompile(`/testdata/|/pkg/`),
+			content: `mode: set
+example.com/pkg/file1.go:10.20,30.2 3 1
+example.com/pkg/file2.go:10.20,30.2 3 1
+example.com/testdata/file2.go:5.20,8.2 2 1
+example.com/cmd/app.go:15.30,20.2 3 1`,
+			want: []*FileCoverage{
+				{
+					File:       "example.com/cmd/app.go",
+					Coverage:   100.0,
+					Statements: 3,
+					Covered:    3,
+				},
+			},
+		},
+		{
+			name:         "no matches",
+			excludeRegex: regexp.MustCompile(`\.js$`),
+			content: `mode: set
+example.com/pkg/file1.go:10.20,30.2 3 1
+example.com/pkg/file2.go:5.20,8.2 2 1`,
+			want: []*FileCoverage{
+				{
+					File:       "example.com/pkg/file1.go",
+					Coverage:   100.0,
+					Statements: 3,
+					Covered:    3,
+				},
+				{
+					File:       "example.com/pkg/file2.go",
+					Coverage:   100.0,
+					Statements: 2,
+					Covered:    2,
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tmpfile := createTempFile(t, tt.content)
+			defer os.Remove(tmpfile.Name())
+
+			got, err := ReadCoverage(tmpfile.Name(), &Options{Top: 10, SortBy: Worst, ExcludeRegex: tt.excludeRegex})
 
 			require.NoError(t, err)
 			require.Equal(t, len(tt.want), len(got), "Results length mismatch")

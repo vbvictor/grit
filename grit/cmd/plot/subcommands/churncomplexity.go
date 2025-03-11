@@ -13,26 +13,27 @@ import (
 )
 
 var (
-	outputFile string
-	since      string
-	until      string
-	churnType  git.ChurnType
+	outputFile   string
+	since        string
+	until        string
+	churnType    git.ChurnType
+	excludeRegex string
 )
 
 var churnOpts = &git.ChurnOptions{
-	SortBy:      git.Changes,
-	Top:         0,
-	Extensions:  nil,
-	Since:       time.Time{},
-	Until:       time.Time{},
-	Path:        "",
-	ExcludePath: "",
+	SortBy:       git.Changes,
+	Top:          0,
+	Extensions:   nil,
+	Since:        time.Time{},
+	Until:        time.Time{},
+	Path:         "",
+	ExcludeRegex: nil,
 }
 
-var complexityOpts = complexity.Options{
-	Engine:      complexity.Gocyclo,
-	ExcludePath: "",
-	Top:         0, //nolint:mnd // default value
+var complexityOpts = &complexity.Options{
+	Engine:       complexity.Gocyclo,
+	ExcludeRegex: nil,
+	Top:          0, //nolint:mnd // default value
 }
 
 var ChurnComplexityCmd = &cobra.Command{
@@ -53,7 +54,7 @@ Open generated file '.html' in a browser to view the graph.`,
 
 		flag.LogIfVerbose("Processing directory: %s\n", repoPath)
 
-		if err := git.PopulateOpts(churnOpts, []string{"go"}, since, until, repoPath); err != nil {
+		if err := git.PopulateOpts(churnOpts, []string{"go"}, since, until, repoPath, excludeRegex); err != nil {
 			return fmt.Errorf("failed to create options: %w", err)
 		}
 
@@ -67,6 +68,10 @@ Open generated file '.html' in a browser to view the graph.`,
 		flag.LogIfVerbose("Got %d churn files\n", len(churns))
 
 		flag.LogIfVerbose("Analyzing complexity data...\n")
+
+		if err := complexity.PopulateOpts(complexityOpts, excludeRegex); err != nil {
+			return fmt.Errorf("failed to create options: %w", err)
+		}
 
 		complexityStats, err := complexity.RunComplexity(repoPath, complexityOpts)
 		if err != nil {
@@ -93,6 +98,7 @@ func init() {
 	// Common flags
 	flags.BoolVarP(&flag.Verbose, flag.LongVerbose, flag.ShortVerbose, false, "Show detailed progress")
 	flags.StringVarP(&outputFile, "output", "o", "complexity_churn.html", "Output graph file name")
+	flags.StringVar(&excludeRegex, flag.LongExclude, "", "Exclude files matching regex pattern")
 
 	flags.StringVarP(&churnType, "churn-type", "t", git.Commits,
 		fmt.Sprintf("Specify churn type for plotting: [%s, %s]", git.Changes, git.Commits))

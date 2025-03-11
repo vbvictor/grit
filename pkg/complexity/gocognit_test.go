@@ -2,6 +2,7 @@ package complexity
 
 import (
 	"path/filepath"
+	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -25,6 +26,7 @@ func TestRunGocognit(t *testing.T) {
 		name          string
 		directory     string
 		expectedFiles map[string]ExpectedFile
+		excludeRegex  *regexp.Regexp
 	}{
 		{
 			name:          "Empty directory",
@@ -107,6 +109,34 @@ func TestRunGocognit(t *testing.T) {
 			},
 		},
 		{
+			name:         "Exclude regex",
+			directory:    "nested",
+			excludeRegex: regexp.MustCompile(`file1\.go$|morelevel2`),
+			expectedFiles: map[string]ExpectedFile{
+				"main.go": {
+					Functions: map[string]TestFunction{
+						"BaseFunction":    {0, 3, "nested", "main.go"},
+						"SimpleCondition": {1, 7, "nested", "main.go"},
+					},
+					AvgComplexity: 0.5,
+				},
+				filepath.Join("level1", "level2", "file2.go"): {
+					Functions: map[string]TestFunction{
+						"Func3": {6, 3, "level2", filepath.Join("level1", "level2", "file2.go")},
+						"Func4": {10, 15, "level2", filepath.Join("level1", "level2", "file2.go")},
+					},
+					AvgComplexity: 8.0,
+				},
+				filepath.Join("level1", "level2", "file3.go"): {
+					Functions: map[string]TestFunction{
+						"NestedLoopsWithConditions": {10, 3, "level2", filepath.Join("level1", "level2", "file3.go")},
+						"SwitchWithLoops":           {9, 17, "level2", filepath.Join("level1", "level2", "file3.go")},
+					},
+					AvgComplexity: 9.5,
+				},
+			},
+		},
+		{
 			name:      "Special cases",
 			directory: "special",
 			expectedFiles: map[string]ExpectedFile{
@@ -124,7 +154,7 @@ func TestRunGocognit(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			testPath := filepath.Join("..", "..", "testdata", "complexity", "gocode", tt.directory)
-			result, err := RunGocognit(testPath, Options{})
+			result, err := RunGocognit(testPath, &Options{ExcludeRegex: tt.excludeRegex})
 
 			require.NoError(t, err)
 			assert.Len(t, result, len(tt.expectedFiles))

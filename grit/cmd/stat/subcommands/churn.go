@@ -12,20 +12,21 @@ import (
 )
 
 var churnOpts = &git.ChurnOptions{
-	SortBy:      git.Changes,
-	Top:         git.DefaultTop,
-	Extensions:  nil,
-	Since:       time.Time{},
-	Until:       time.Time{},
-	Path:        "",
-	ExcludePath: "",
+	SortBy:       git.Changes,
+	Top:          git.DefaultTop,
+	Extensions:   nil,
+	Since:        time.Time{},
+	Until:        time.Time{},
+	Path:         "",
+	ExcludeRegex: nil,
 }
 
 var (
-	extensionList []string
-	since         string
-	until         string
-	repoPath      string
+	extensionList     []string
+	since             string
+	until             string
+	repoPath          string
+	excludeChurnRegex string
 )
 
 var ChurnCmd = &cobra.Command{ //nolint:exhaustruct // no need to set all fields
@@ -41,7 +42,7 @@ var ChurnCmd = &cobra.Command{ //nolint:exhaustruct // no need to set all fields
 
 		flag.LogIfVerbose("Processing repository: %s\n", repoPath)
 
-		if err := git.PopulateOpts(churnOpts, extensionList, since, until, repoPath); err != nil {
+		if err := git.PopulateOpts(churnOpts, extensionList, since, until, repoPath, excludeChurnRegex); err != nil {
 			return fmt.Errorf("failed to create options: %w", err)
 		}
 
@@ -63,7 +64,7 @@ func init() {
 		fmt.Sprintf("Specify churn sort type: [%s, %s, %s, %s]", git.Changes, git.Additions, git.Deletions, git.Commits))
 	flags.IntVarP(&churnOpts.Top, flag.LongTop, flag.ShortTop, git.DefaultTop, "Number of top files to display")
 	flags.BoolVarP(&flag.Verbose, flag.LongVerbose, flag.ShortVerbose, false, "Show detailed progress")
-	flags.StringVar(&churnOpts.ExcludePath, flag.LongExclude, "", "Exclude files matching regex pattern")
+	flags.StringVar(&excludeChurnRegex, flag.LongExclude, "", "Exclude files matching regex pattern")
 	flags.StringSliceVarP(&extensionList, flag.LongExtensions, flag.ShortExt, nil,
 		"Only include files with given extensions in comma-separated list, e.g. 'go,h,c'")
 	flags.StringVarP(&since, flag.LongSince, flag.ShortSince, "", "Start date for analysis in format 'YYYY-MM-DD'")

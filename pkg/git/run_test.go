@@ -3,6 +3,7 @@ package git
 import (
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -210,7 +211,7 @@ func TestShouldSkipFile(t *testing.T) {
 			name: "exclude pattern matches",
 			file: "vendor/some/pkg/file.go",
 			opts: &ChurnOptions{
-				ExcludePath: "vendor/.*",
+				ExcludeRegex: regexp.MustCompile("vendor/.*"),
 			},
 			expected: true,
 		},
@@ -218,7 +219,7 @@ func TestShouldSkipFile(t *testing.T) {
 			name: "exclude pattern does not match",
 			file: "src/pkg/file.go",
 			opts: &ChurnOptions{
-				ExcludePath: "vendor/.*",
+				ExcludeRegex: regexp.MustCompile("vendor/.*"),
 			},
 			expected: false,
 		},
@@ -253,7 +254,7 @@ func TestShouldSkipFile(t *testing.T) {
 			name: "both filters applied - file matches both",
 			file: "src/main.go",
 			opts: &ChurnOptions{
-				ExcludePath: "test/.*",
+				ExcludeRegex: regexp.MustCompile("test/.*"),
 				Extensions: map[string]struct{}{
 					"go": {},
 				},

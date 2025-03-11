@@ -11,13 +11,15 @@ import (
 	"github.com/vbvictor/grit/pkg/coverage"
 )
 
-var coverageOpts = coverage.Options{
+var coverageOpts = &coverage.Options{
 	SortBy:           coverage.Worst,
 	Top:              10, //nolint:mnd // default value
-	ExcludePath:      "",
+	ExcludeRegex:     nil,
 	RunCoverage:      "",
 	CoverageFilename: "coverage.out",
 }
+
+var excludeCoverageRegex string
 
 var CoverageCmd = &cobra.Command{ //nolint:exhaustruct // no need to set all fields
 	Use:   "coverage [flags] <path>",
@@ -30,6 +32,10 @@ var CoverageCmd = &cobra.Command{ //nolint:exhaustruct // no need to set all fie
 		}
 
 		flag.LogIfVerbose("Processing directory: %s\n", repoPath)
+
+		if err := coverage.PopulateOpts(coverageOpts, excludeCoverageRegex); err != nil {
+			return fmt.Errorf("failed to create options: %w", err)
+		}
 
 		covData, err := coverage.GetCoverageData(repoPath, coverageOpts)
 		if err != nil {
@@ -59,4 +65,5 @@ func init() {
 		"Name of code coverage file to read or create")
 	flags.BoolVarP(&flag.Verbose, flag.LongVerbose, flag.ShortVerbose, false, "Enable verbose output")
 	flags.IntVarP(&coverageOpts.Top, flag.LongTop, flag.ShortTop, flag.DefaultTop, "Number of top files to display")
+	flags.StringVar(&excludeCoverageRegex, flag.LongExclude, "", "Exclude files matching regex pattern")
 }

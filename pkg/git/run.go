@@ -56,13 +56,13 @@ func (d *Date) Set(value string) error {
 }
 
 type ChurnOptions struct {
-	SortBy      ChurnType
-	Top         int
-	Path        string
-	ExcludePath string
-	Extensions  map[string]struct{}
-	Since       time.Time
-	Until       time.Time
+	SortBy       ChurnType
+	Top          int
+	Path         string
+	ExcludeRegex *regexp.Regexp
+	Extensions   map[string]struct{}
+	Since        time.Time
+	Until        time.Time
 }
 
 type ChurnChunk struct {
@@ -77,6 +77,7 @@ func PopulateOpts(opts *ChurnOptions, extensionList []string,
 	since string,
 	until string,
 	repoPath string,
+	excludeRegex string,
 ) error {
 	opts.Path = repoPath
 
@@ -90,6 +91,15 @@ func PopulateOpts(opts *ChurnOptions, extensionList []string,
 
 	if extensionList != nil {
 		opts.Extensions = flag.GetExtMap(extensionList)
+	}
+
+	if excludeRegex != "" {
+		var err error
+
+		opts.ExcludeRegex, err = regexp.Compile(excludeRegex)
+		if err != nil {
+			return fmt.Errorf("invalid exclude pattern: %w", err)
+		}
 	}
 
 	return nil
@@ -239,10 +249,8 @@ func isNumeric(s string) bool {
 }
 
 func shouldSkipFile(file string, opts *ChurnOptions) bool {
-	if opts.ExcludePath != "" {
-		if matched, _ := regexp.MatchString(opts.ExcludePath, file); matched {
-			return true
-		}
+	if opts.ExcludeRegex != nil && opts.ExcludeRegex.MatchString(file) {
+		return true
 	}
 
 	if opts.Extensions != nil {
