@@ -5,6 +5,7 @@ linters:
     - godox
     - gci
     - tenv
+    - err113
     - testpackage
     - gochecknoglobals # store global configuration values
     - forbidigo # use printf for showing progress information and verbose output

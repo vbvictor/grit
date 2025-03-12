@@ -63,6 +63,7 @@ type ChurnOptions struct {
 	Extensions   map[string]struct{}
 	Since        time.Time
 	Until        time.Time
+	OutputFormat string
 }
 
 type ChurnChunk struct {

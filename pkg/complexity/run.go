@@ -33,6 +33,7 @@ type Options struct {
 	Engine       string
 	ExcludeRegex *regexp.Regexp
 	Top          int
+	OutputFormat string
 }
 
 var ErrUnsupportedEngine = errors.New("unsupported complexity engine")

@@ -42,6 +42,7 @@ type Options struct {
 	ExcludeRegex     *regexp.Regexp
 	RunCoverage      string
 	CoverageFilename string
+	OutputFormat     string
 }
 
 func PopulateOpts(opts *Options, excludeRegex string) error {

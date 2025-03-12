@@ -19,6 +19,7 @@ var churnOpts = &git.ChurnOptions{
 	Until:        time.Time{},
 	Path:         "",
 	ExcludeRegex: nil,
+	OutputFormat: "",
 }
 
 var (
@@ -64,6 +65,8 @@ func init() {
 		fmt.Sprintf("Specify churn sort type: [%s, %s, %s, %s]", git.Changes, git.Additions, git.Deletions, git.Commits))
 	flags.IntVarP(&churnOpts.Top, flag.LongTop, flag.ShortTop, git.DefaultTop, "Number of top files to display")
 	flags.BoolVarP(&flag.Verbose, flag.LongVerbose, flag.ShortVerbose, false, "Show detailed progress")
+	flags.StringVarP(&churnOpts.OutputFormat, flag.LongFormat, flag.ShortFormat, flag.Tabular,
+		fmt.Sprintf("Specify output format: [%s, %s]", flag.Tabular, flag.CSV))
 	flags.StringVar(&excludeChurnRegex, flag.LongExclude, "", "Exclude files matching regex pattern")
 	flags.StringSliceVarP(&extensionList, flag.LongExtensions, flag.ShortExt, nil,
 		"Only include files with given extensions in comma-separated list, e.g. 'go,h,c'")

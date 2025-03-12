@@ -35,9 +35,9 @@ var (
 	CoverageFactor   float64
 
 	// Output format flags.
-	JSON                   OutputType = "json"
 	Tabular                OutputType = "tabular"
-	AvailableOutputFormats            = []OutputType{JSON, Tabular}
+	CSV                    OutputType = "csv"
+	AvailableOutputFormats            = []OutputType{Tabular, CSV}
 
 	// Coverage Run formats.
 	Always = "Always"

@@ -17,6 +17,7 @@ var coverageOpts = &coverage.Options{
 	ExcludeRegex:     nil,
 	RunCoverage:      "",
 	CoverageFilename: "coverage.out",
+	OutputFormat:     "",
 }
 
 var excludeCoverageRegex string
@@ -44,9 +45,7 @@ var CoverageCmd = &cobra.Command{ //nolint:exhaustruct // no need to set all fie
 
 		covData = coverage.SortAndLimit(covData, coverageOpts.SortBy, coverageOpts.Top)
 
-		coverage.PrintTabular(covData, os.Stdout)
-
-		return nil
+		return coverage.PrintStats(covData, os.Stdout, coverageOpts)
 	},
 }
 
@@ -66,4 +65,6 @@ func init() {
 	flags.BoolVarP(&flag.Verbose, flag.LongVerbose, flag.ShortVerbose, false, "Enable verbose output")
 	flags.IntVarP(&coverageOpts.Top, flag.LongTop, flag.ShortTop, flag.DefaultTop, "Number of top files to display")
 	flags.StringVar(&excludeCoverageRegex, flag.LongExclude, "", "Exclude files matching regex pattern")
+	flags.StringVarP(&coverageOpts.OutputFormat, flag.LongFormat, flag.ShortFormat, flag.Tabular,
+		fmt.Sprintf("Specify output format: [%s, %s]", flag.Tabular, flag.CSV))
 }
