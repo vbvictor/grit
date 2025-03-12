@@ -15,6 +15,7 @@ var complexityOpts = complexity.Options{
 	Engine:       complexity.Gocyclo,
 	ExcludeRegex: nil,
 	Top:          10, //nolint:mnd // default value
+	OutputFormat: "",
 }
 
 var excludeComplexityRegex string
@@ -42,9 +43,7 @@ var ComplexityCmd = &cobra.Command{ //nolint:exhaustruct // no need to set all f
 
 		fileStat = complexity.SortAndLimit(fileStat, complexityOpts)
 
-		complexity.PrintTabular(fileStat, os.Stdout)
-
-		return nil
+		return complexity.PrintStats(fileStat, os.Stdout, &complexityOpts)
 	},
 }
 
@@ -56,4 +55,6 @@ func init() {
 	flags.IntVarP(&complexityOpts.Top, flag.LongTop, flag.ShortTop, git.DefaultTop, "Number of top files to display")
 	flags.BoolVarP(&flag.Verbose, flag.LongVerbose, flag.ShortVerbose, false, "Show detailed progress")
 	flags.StringVar(&excludeComplexityRegex, flag.LongExclude, "", "Exclude files matching regex pattern")
+	flags.StringVarP(&complexityOpts.OutputFormat, flag.LongFormat, flag.ShortFormat, flag.Tabular,
+		fmt.Sprintf("Specify output format: [%s, %s]", flag.Tabular, flag.CSV))
 }
