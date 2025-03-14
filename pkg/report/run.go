@@ -14,6 +14,7 @@ type Options struct {
 	ChurnFactor      float64
 	ComplexityFactor float64
 	CoverageFactor   float64
+	PerfectCoverage  int
 	Top              int
 	ExcludePath      string
 }

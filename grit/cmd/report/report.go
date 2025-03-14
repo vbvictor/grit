@@ -65,6 +65,7 @@ var reportOpts = report.Options{
 	ChurnFactor:      1.0,
 	ComplexityFactor: 1.0,
 	CoverageFactor:   1.0,
+	PerfectCoverage:  100, //nolint:mnd // default value
 }
 
 var ReportCmd = &cobra.Command{
@@ -166,6 +167,8 @@ func init() {
 	flags.Float64Var(&reportOpts.ChurnFactor, "churn-factor", 1.0, "Churn factor")
 	flags.Float64Var(&reportOpts.ComplexityFactor, "comp-factor", 1.0, "Complexity factor")
 	flags.Float64Var(&reportOpts.CoverageFactor, "cov-factor", 1.0, "Coverage factor")
+	flags.Float64Var(&reportOpts.CoverageFactor, "perfect-coverage", 100, //nolint:mnd // default value
+		"Specify code coverage penalty threshold")
 }
 
 func validateFactors(opts *report.Options) error {
