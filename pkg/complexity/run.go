@@ -12,6 +12,7 @@ type Engine = string
 const (
 	Gocyclo  = "gocyclo"
 	Gocognit = "gocognit"
+	CSV      = "csv-file"
 )
 
 type FileStat struct {
@@ -57,6 +58,8 @@ func RunComplexity(repoPath string, opts *Options) ([]*FileStat, error) {
 		return RunGocyclo(repoPath, opts)
 	case Gocognit:
 		return RunGocognit(repoPath, opts)
+	case CSV:
+		return RunCSV(repoPath, opts)
 	default:
 		return nil, ErrUnsupportedEngine
 	}
