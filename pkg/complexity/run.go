@@ -3,6 +3,7 @@ package complexity
 import (
 	"errors"
 	"fmt"
+	"path/filepath"
 	"regexp"
 	"slices"
 )
@@ -59,7 +60,7 @@ func RunComplexity(repoPath string, opts *Options) ([]*FileStat, error) {
 	case Gocognit:
 		return RunGocognit(repoPath, opts)
 	case CSV:
-		return RunCSV(repoPath, opts)
+		return RunCSV(filepath.Join(repoPath, "complexity.csv"), opts)
 	default:
 		return nil, ErrUnsupportedEngine
 	}

@@ -96,20 +96,20 @@ func init() {
 	flags := ChurnComplexityCmd.PersistentFlags()
 
 	// Common flags
-	flags.BoolVarP(&flag.Verbose, flag.LongVerbose, flag.ShortVerbose, false, "Show detailed progress")
-	flags.StringVarP(&outputFile, "output", "o", "complexity_churn.html", "Output graph file name")
-	flags.StringVar(&excludeRegex, flag.LongExclude, "", "Exclude files matching regex pattern")
-
-	flags.StringVarP(&churnType, "churn-type", "t", git.Commits,
-		fmt.Sprintf("Specify churn type for plotting: [%s, %s]", git.Changes, git.Commits))
+	flag.VerboseFlag(flags, &flag.Verbose)
+	flag.OutputFlag(flags, &outputFile, "complexity_churn.html")
+	flag.ExcludeRegexFlag(flags, &excludeRegex)
+	flag.ChurnTypeFlag(flags, &churnType, git.Commits)
 
 	// Churn flags
-	flags.StringVarP(&since, flag.LongSince, flag.ShortSince, "", "Start date for analysis in format 'YYYY-MM-DD'")
-	flags.StringVarP(&until, flag.LongUntil, flag.ShortUntil, "", "End date for analysis in format 'YYYY-MM-DD'")
+	flag.SinceFlag(flags, &since)
+	flag.UntilFlag(flags, &until)
 
 	// Complexity flags
-	flags.StringVarP(&complexityOpts.Engine, flag.LongEngine, flag.ShortEngine, complexity.Gocyclo,
-		fmt.Sprintf("Specify complexity calculation engine: [%s, %s]", complexity.Gocyclo, complexity.Gocognit))
+	flag.EngineFlag(flags, &complexityOpts.Engine, complexity.Gocyclo)
+
+	ChurnComplexityCmd.Flag(flag.LongUntil).DefValue = flag.DefaultUntil
+	ChurnComplexityCmd.Flag(flag.LongSince).DefValue = flag.DefaultSince
 
 	ChurnComplexityCmd.Flag(flag.LongUntil).DefValue = flag.DefaultUntil
 	ChurnComplexityCmd.Flag(flag.LongSince).DefValue = flag.DefaultSince

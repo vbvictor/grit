@@ -5,21 +5,7 @@ import (
 	"io"
 
 	"github.com/bndr/gotabulate"
-	"github.com/vbvictor/grit/grit/cmd/flag"
 )
-
-func PrintStats(results []*FileCoverage, out io.Writer, opts *Options) error {
-	switch opts.OutputFormat {
-	case flag.CSV:
-		PrintCSV(results, out)
-	case flag.Tabular:
-		PrintTabular(results, out)
-	default:
-		return fmt.Errorf("unsupported output format: %s", opts.OutputFormat)
-	}
-
-	return nil
-}
 
 func PrintTabular(results []*FileCoverage, out io.Writer) {
 	fmt.Fprintf(out, "\nCode coverage analysis results:\n")

@@ -2,6 +2,7 @@ package coverage
 
 import (
 	"os"
+	"path/filepath"
 	"regexp"
 	"testing"
 
@@ -9,10 +10,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func createTempFile(t *testing.T, content string) *os.File {
+func createTempFile(t *testing.T, dir, content string) *os.File {
 	t.Helper()
 
-	tmpfile, err := os.CreateTemp(t.TempDir(), "coverage.*.out")
+	tmpfile, err := os.CreateTemp(dir, "coverage*.out")
 	require.NoError(t, err, "Failed to create temp file")
 
 	_, err = tmpfile.WriteString(content)
@@ -68,10 +69,10 @@ example.com/pkg/file1.go:10.20,30.2 3 1`,
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tmpfile := createTempFile(t, tt.content)
-			defer os.Remove(tmpfile.Name())
+			tmpDir := t.TempDir()
+			tmpfile := createTempFile(t, tmpDir, tt.content)
 
-			got, err := ReadCoverage(tmpfile.Name(), &Options{Top: 10, SortBy: Worst, ExcludeRegex: nil})
+			got, err := ReadCoverage(tmpDir, filepath.Base(tmpfile.Name()), &Options{Top: 10, SortBy: Worst, ExcludeRegex: nil})
 
 			if tt.wantErr != nil {
 				require.ErrorIs(t, err, tt.wantErr)
@@ -161,10 +162,10 @@ example.com/pkg/file2.go:5.20,8.2 2 1`,
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tmpfile := createTempFile(t, tt.content)
-			defer os.Remove(tmpfile.Name())
-
-			got, err := ReadCoverage(tmpfile.Name(), &Options{Top: 10, SortBy: Worst, ExcludeRegex: tt.excludeRegex})
+			tmpDir := t.TempDir()
+			tmpfile := createTempFile(t, tmpDir, tt.content)
+			got, err := ReadCoverage(tmpDir, filepath.Base(tmpfile.Name()),
+				&Options{Top: 10, SortBy: Worst, ExcludeRegex: tt.excludeRegex})
 
 			require.NoError(t, err)
 			require.Equal(t, len(tt.want), len(got), "Results length mismatch")

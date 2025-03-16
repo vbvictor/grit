@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/spf13/pflag"
-	"github.com/vbvictor/grit/grit/cmd/flag"
 	"golang.org/x/exp/maps"
 )
 
@@ -74,6 +73,16 @@ type ChurnChunk struct {
 	Commits int    `json:"commits"`
 }
 
+func getExtMap(extensions []string) map[string]struct{} {
+	extMap := make(map[string]struct{})
+
+	for _, ext := range extensions {
+		extMap[ext] = struct{}{}
+	}
+
+	return extMap
+}
+
 func PopulateOpts(opts *ChurnOptions, extensionList []string,
 	since string,
 	until string,
@@ -91,7 +100,7 @@ func PopulateOpts(opts *ChurnOptions, extensionList []string,
 	}
 
 	if extensionList != nil {
-		opts.Extensions = flag.GetExtMap(extensionList)
+		opts.Extensions = getExtMap(extensionList)
 	}
 
 	if excludeRegex != "" {

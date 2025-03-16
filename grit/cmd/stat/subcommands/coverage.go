@@ -1,8 +1,8 @@
 package stat
 
 import (
-	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -27,10 +27,13 @@ var CoverageCmd = &cobra.Command{ //nolint:exhaustruct // no need to set all fie
 	Short: "Finds files with the least unit-test coverage",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(_ *cobra.Command, args []string) error {
-		repoPath, err := filepath.Abs(args[0])
-		if err != nil {
-			return errors.Join(&flag.AbsRepoPathError{Path: args[0]}, err)
-		}
+		/*
+			repoPath, err := filepath.Abs(args[0])
+			if err != nil {
+				return errors.Join(&flag.AbsRepoPathError{Path: args[0]}, err)
+			}
+		*/
+		repoPath := filepath.ToSlash(filepath.Clean(args[0]))
 
 		flag.LogIfVerbose("Processing directory: %s\n", repoPath)
 
@@ -45,26 +48,32 @@ var CoverageCmd = &cobra.Command{ //nolint:exhaustruct // no need to set all fie
 
 		covData = coverage.SortAndLimit(covData, coverageOpts.SortBy, coverageOpts.Top)
 
-		return coverage.PrintStats(covData, os.Stdout, coverageOpts)
+		return printCoverageStats(covData, os.Stdout, coverageOpts)
 	},
 }
 
 func init() {
 	flags := CoverageCmd.PersistentFlags()
 
-	flags.StringVar(&coverageOpts.SortBy, flag.LongSort, coverage.Worst,
+	flag.SortFlag(flags, &coverageOpts.SortBy, coverage.Worst,
 		fmt.Sprintf("Specify sort type: [%s, %s]", coverage.Worst, coverage.Best))
-	flags.StringVarP(&coverageOpts.RunCoverage, flag.LongRunCoverage, flag.ShortRunCoverage, flag.Auto,
-		`Specify tests run format:
-  'Auto' will run unit tests if coverage file is not found
-  'Always' will run unit tests on every invoke 'coverage' command
-  'Never' will never run unit tests and always look for present test-coverage file
-`)
-	flags.StringVarP(&coverageOpts.CoverageFilename, flag.LongFileCoverage, flag.ShortFileCoverage, "coverage.out",
-		"Name of code coverage file to read or create")
-	flags.BoolVarP(&flag.Verbose, flag.LongVerbose, flag.ShortVerbose, false, "Enable verbose output")
-	flags.IntVarP(&coverageOpts.Top, flag.LongTop, flag.ShortTop, flag.DefaultTop, "Number of top files to display")
-	flags.StringVar(&excludeCoverageRegex, flag.LongExclude, "", "Exclude files matching regex pattern")
-	flags.StringVarP(&coverageOpts.OutputFormat, flag.LongFormat, flag.ShortFormat, flag.Tabular,
-		fmt.Sprintf("Specify output format: [%s, %s]", flag.Tabular, flag.CSV))
+	flag.RunCoverageFlag(flags, &coverageOpts.RunCoverage)
+	flag.CoverageFilenameFlag(flags, &coverageOpts.CoverageFilename)
+	flag.VerboseFlag(flags, &flag.Verbose)
+	flag.TopFlag(flags, &coverageOpts.Top)
+	flag.ExcludeRegexFlag(flags, &excludeCoverageRegex)
+	flag.OutputFormatFlag(flags, &coverageOpts.OutputFormat)
+}
+
+func printCoverageStats(results []*coverage.FileCoverage, out io.Writer, opts *coverage.Options) error {
+	switch opts.OutputFormat {
+	case flag.CSV:
+		coverage.PrintCSV(results, out)
+	case flag.Tabular:
+		coverage.PrintTabular(results, out)
+	default:
+		return fmt.Errorf("unsupported output format: %s", opts.OutputFormat)
+	}
+
+	return nil
 }

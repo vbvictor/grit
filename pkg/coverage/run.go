@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strings"
 
 	"github.com/vbvictor/grit/grit/cmd/flag"
 	"golang.org/x/tools/cover"
@@ -90,7 +91,7 @@ func GetCoverageData(repoPath string, coverageOpts *Options) ([]*FileCoverage, e
 		flag.LogIfVerbose("Coverage file %s created\n", coveragePath)
 	}
 
-	covData, err := ReadCoverage(filepath.Join(repoPath, coverageOpts.CoverageFilename), coverageOpts)
+	covData, err := ReadCoverage(repoPath, coverageOpts.CoverageFilename, coverageOpts)
 	if err != nil {
 		return nil, errors.Join(flag.ErrReadCoverage, err)
 	}
@@ -98,8 +99,8 @@ func GetCoverageData(repoPath string, coverageOpts *Options) ([]*FileCoverage, e
 	return covData, nil
 }
 
-func ReadCoverage(coverageFile string, opts *Options) ([]*FileCoverage, error) {
-	profiles, err := cover.ParseProfiles(coverageFile)
+func ReadCoverage(path, file string, opts *Options) ([]*FileCoverage, error) {
+	profiles, err := cover.ParseProfiles(filepath.Join(path, file))
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse profiles data: %w", err)
 	}
@@ -132,7 +133,7 @@ func ReadCoverage(coverageFile string, opts *Options) ([]*FileCoverage, error) {
 		}
 
 		results = append(results, &FileCoverage{
-			File:       profile.FileName,
+			File:       extractRelativePath(profile.FileName, path),
 			Coverage:   coverage,
 			Statements: total,
 			Covered:    covered,
@@ -140,6 +141,17 @@ func ReadCoverage(coverageFile string, opts *Options) ([]*FileCoverage, error) {
 	}
 
 	return results, nil
+}
+
+func extractRelativePath(fullPath, targetDir string) string {
+	index := strings.Index(fullPath, targetDir)
+	flag.LogIfVerbose("%s:%s\n", fullPath, targetDir)
+
+	if index != -1 {
+		return fullPath[index:]
+	}
+
+	return fullPath
 }
 
 func SortAndLimit(result []*FileCoverage, sortBy SortType, limit int) []*FileCoverage {
