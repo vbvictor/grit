@@ -230,7 +230,7 @@ func processFileLine(line string, fileStats map[string]*ChurnChunk, modifiedInCo
 		additions, _ := strconv.Atoi(parts[0])
 		deletions, _ := strconv.Atoi(parts[1])
 
-		path := parts[2]
+		path := filepath.ToSlash(filepath.Clean(parts[2]))
 
 		if shouldSkipFile(path, opts) {
 			return

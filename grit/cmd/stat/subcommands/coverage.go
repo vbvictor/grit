@@ -27,12 +27,6 @@ var CoverageCmd = &cobra.Command{ //nolint:exhaustruct // no need to set all fie
 	Short: "Finds files with the least unit-test coverage",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(_ *cobra.Command, args []string) error {
-		/*
-			repoPath, err := filepath.Abs(args[0])
-			if err != nil {
-				return errors.Join(&flag.AbsRepoPathError{Path: args[0]}, err)
-			}
-		*/
 		repoPath := filepath.ToSlash(filepath.Clean(args[0]))
 
 		flag.LogIfVerbose("Processing directory: %s\n", repoPath)

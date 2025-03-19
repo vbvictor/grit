@@ -44,7 +44,7 @@ func RunGocognit(repoPath string, opts *Options) ([]*FileStat, error) { //nolint
 			}
 
 			functions = append(functions, FunctionStat{
-				File:       relPath,
+				File:       filepath.ToSlash(filepath.Clean(relPath)),
 				Package:    []string{stat.PkgName},
 				Name:       stat.FuncName,
 				Line:       stat.Pos.Line,

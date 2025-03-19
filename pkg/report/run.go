@@ -3,7 +3,6 @@ package report
 import (
 	"path/filepath"
 	"slices"
-	"strings"
 
 	"github.com/vbvictor/grit/pkg/complexity"
 	"github.com/vbvictor/grit/pkg/coverage"
@@ -113,9 +112,5 @@ func CombineMetrics(
 }
 
 func normalizePath(path string) string {
-	normalized := filepath.ToSlash(path)
-	normalized = strings.TrimPrefix(normalized, "./")
-	normalized = strings.TrimPrefix(normalized, "/")
-
-	return normalized
+	return filepath.ToSlash(filepath.Clean(path))
 }

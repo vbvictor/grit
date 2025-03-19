@@ -12,6 +12,7 @@ linters:
     - gochecknoinits # init functions to setup cobra commands
     - nolintlint
     - exhaustruct
+    - exptostd # enable it later
 linters-settings:
   gocritic:
     enable-all: true

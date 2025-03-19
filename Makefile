@@ -33,5 +33,5 @@ coverage:
 	go tool cover -html=coverage.out
 
 deps:
-	go mod download
 	go mod tidy
+	go mod download

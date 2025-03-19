@@ -33,7 +33,7 @@ func RunGocyclo(repoPath string, opts *Options) ([]*FileStat, error) {
 
 	for filePath, functions := range fileMap {
 		result = append(result, &FileStat{
-			Path:      filePath,
+			Path:      filepath.ToSlash(filepath.Clean(filePath)),
 			Functions: functions,
 		})
 	}
