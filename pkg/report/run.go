@@ -82,7 +82,7 @@ func CombineMetrics(
 
 		if !exists {
 			score = &FileScore{
-				File: chunk.File,
+				File: normalizedPath,
 			}
 			fileMap[normalizedPath] = score
 		}
@@ -112,5 +112,5 @@ func CombineMetrics(
 }
 
 func normalizePath(path string) string {
-	return filepath.ToSlash(filepath.Clean(path))
+	return filepath.Clean(path)
 }

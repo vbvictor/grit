@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
-	"strings"
 
 	"github.com/vbvictor/grit/grit/cmd/flag"
 	"golang.org/x/tools/cover"
@@ -144,12 +143,13 @@ func ReadCoverage(path, file string, opts *Options) ([]*FileCoverage, error) {
 }
 
 func extractRelativePath(fullPath, targetDir string) string {
-	index := strings.Index(fullPath, targetDir)
-	flag.LogIfVerbose("%s:%s\n", fullPath, targetDir)
+	fullPath = filepath.FromSlash(fullPath)
 
-	if index != -1 {
-		return fullPath[index:]
-	}
+	// tmm := filepath.Rel(, targpath string)
+
+	flag.LogIfVerbose("%s:%s\n", fullPath, targetDir)
+	pp, err := filepath.Abs(targetDir)
+	flag.LogIfVerbose("%s:%s\n", pp, err)
 
 	return fullPath
 }
@@ -179,9 +179,10 @@ func RunCoverage(repoPath, coverageFile string) error {
 	cmd := exec.Command( //nolint:gosec // go test is allowed command
 		"go",
 		"test",
-		filepath.Join(repoPath, "..."),
+		"./...",
 		"-v",
 		"-coverprofile="+coverageFile)
+	cmd.Dir = repoPath
 
 	flag.LogIfVerbose("Running command: %s\n", cmd.String())
 

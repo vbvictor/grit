@@ -27,7 +27,6 @@ var (
 	extensionList     []string
 	since             string
 	until             string
-	repoPath          string
 	excludeChurnRegex string
 )
 
@@ -36,19 +35,18 @@ var ChurnCmd = &cobra.Command{ //nolint:exhaustruct // no need to set all fields
 	Short: "Finds files with the most changes in git repository",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(_ *cobra.Command, args []string) error {
-		var err error
-		repoPath, err = filepath.Abs(args[0])
-		if err != nil {
-			return fmt.Errorf("error getting absolute path: %w", err)
+		path := filepath.Clean(args[0])
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			return fmt.Errorf("repository does not exist: %w", err)
 		}
 
-		flag.LogIfVerbose("Processing repository: %s\n", repoPath)
+		flag.LogIfVerbose("Processing repository: %s\n", path)
 
-		if err := git.PopulateOpts(churnOpts, extensionList, since, until, repoPath, excludeChurnRegex); err != nil {
+		if err := git.PopulateOpts(churnOpts, extensionList, since, until, path, excludeChurnRegex); err != nil {
 			return fmt.Errorf("failed to create options: %w", err)
 		}
 
-		churns, err := git.ReadGitChurn(repoPath, churnOpts)
+		churns, err := git.ReadGitChurn(path, churnOpts)
 		if err != nil {
 			return fmt.Errorf("error getting churn metrics: %w", err)
 		}

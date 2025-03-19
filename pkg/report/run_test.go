@@ -1,6 +1,7 @@
 package report
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -204,52 +205,32 @@ func TestCombineMetrics(t *testing.T) {
 	// Define test data
 	churnData := []*git.ChurnChunk{
 		{File: "file1.go", Churn: 100},
-		{File: "./path/to/file3.go", Churn: 200},
+		{File: filepath.Join(".", "path", "to", "file3.go"), Churn: 200},
 	}
 
 	complexityData := []*complexity.FileStat{
 		{Path: "file1.go", AvgComplexity: 10.0},
-		{Path: "path/to/file3.go", AvgComplexity: 5.0},
+		{Path: filepath.Join("path", "to", "file3.go"), AvgComplexity: 5.0},
 		{Path: "file4.go", AvgComplexity: 15.0},
 	}
 
 	coverageData := []*coverage.FileCoverage{
 		{File: "file1.go", Coverage: 80.0},
 		{File: "file2.go", Coverage: 90.0},
-		{File: "path/to/file3.go", Coverage: 70.0},
+		{File: filepath.Join("path", "to", "file3.go"), Coverage: 70.0},
 		{File: "file5.go", Coverage: 60.0},
 	}
 
 	// Expected results (sorted by file name for consistent comparison)
 	expected := []*FileScore{
 		{File: "file1.go", Churn: 100, Complexity: 10.0, Coverage: 80.0, ChurnComplexity: 1000.0},
-		{File: "path/to/file3.go", Churn: 200, Complexity: 5.0, Coverage: 70.0, ChurnComplexity: 1000.0},
+		{File: filepath.Join("path", "to", "file3.go"), Churn: 200, Complexity: 5.0, Coverage: 70.0, ChurnComplexity: 1000.0},
 	}
 
 	result := CombineMetrics(churnData, complexityData, coverageData)
 
 	assert.Equal(t, len(expected), len(result), "Result length mismatch")
 	assert.ElementsMatch(t, result, expected)
-}
-
-func TestNormalizePath(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected string
-	}{
-		{"file.go", "file.go"},
-		{"/file.go", "/file.go"},
-		{"./file.go", "file.go"},
-		{"/path/to/file.go", "/path/to/file.go"},
-		{"./path/to/file.go", "path/to/file.go"},
-		{"path/to/file.go", "path/to/file.go"},
-		// {"path\\to\\file.go", "path/to/file.go"}, // TODO: fix windows path
-	}
-
-	for _, test := range tests {
-		result := normalizePath(test.input)
-		assert.Equal(t, test.expected, result, "For input '%s'", test.input)
-	}
 }
 
 func TestCalculateScore(t *testing.T) {

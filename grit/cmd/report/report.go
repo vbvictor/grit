@@ -1,7 +1,6 @@
 package report
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -24,7 +23,6 @@ var (
 	top          int
 	since        string
 	until        string
-	repoPath     string
 )
 
 var churnOpts = &git.ChurnOptions{
@@ -67,20 +65,19 @@ var ReportCmd = &cobra.Command{
 	Args:          cobra.ExactArgs(1),
 	SilenceErrors: true,
 	RunE: func(_ *cobra.Command, args []string) error {
-		var err error
-		repoPath, err = filepath.Abs(args[0])
-		if err != nil {
-			return errors.Join(&flag.AbsRepoPathError{Path: args[0]}, err)
+		path := filepath.ToSlash(filepath.Clean(args[0]))
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			return fmt.Errorf("repository does not exist: %w", err)
 		}
 
-		flag.LogIfVerbose("Processing directory: %s\n", repoPath)
+		flag.LogIfVerbose("Processing directory: %s\n", path)
 
 		flag.LogIfVerbose("Analyzing churn data...\n")
-		if err := git.PopulateOpts(churnOpts, []string{"go"}, since, until, repoPath, excludeRegex); err != nil {
+		if err := git.PopulateOpts(churnOpts, []string{"go"}, since, until, path, excludeRegex); err != nil {
 			return fmt.Errorf("failed to create options: %w", err)
 		}
 
-		churns, err := git.ReadGitChurn(repoPath, churnOpts)
+		churns, err := git.ReadGitChurn(path, churnOpts)
 		if err != nil {
 			return fmt.Errorf("error getting churn metrics: %w", err)
 		}
@@ -90,7 +87,7 @@ var ReportCmd = &cobra.Command{
 		if err := complexity.PopulateOpts(complexityOpts, excludeRegex); err != nil {
 			return fmt.Errorf("failed to create options: %w", err)
 		}
-		complexityStats, err := complexity.RunComplexity(repoPath, complexityOpts)
+		complexityStats, err := complexity.RunComplexity(path, complexityOpts)
 		if err != nil {
 			return fmt.Errorf("error running complexity analysis: %w", err)
 		}
@@ -101,7 +98,7 @@ var ReportCmd = &cobra.Command{
 		if err := coverage.PopulateOpts(coverageOpts, excludeRegex); err != nil {
 			return fmt.Errorf("failed to create options: %w", err)
 		}
-		covData, err := coverage.GetCoverageData(repoPath, coverageOpts)
+		covData, err := coverage.GetCoverageData(path, coverageOpts)
 		if err != nil {
 			return fmt.Errorf("failed to get coverage data: %w", err)
 		}

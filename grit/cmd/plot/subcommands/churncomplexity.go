@@ -2,6 +2,7 @@ package plot
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -47,20 +48,20 @@ Open generated file '.html' in a browser to view the graph.`,
 		return plot.ValidateRiskThresholds()
 	},
 	RunE: func(_ *cobra.Command, args []string) error {
-		repoPath, err := filepath.Abs(args[0])
-		if err != nil {
-			return fmt.Errorf("error getting absolute path: %w", err)
+		path := filepath.Clean(args[0])
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			return fmt.Errorf("repository does not exist: %w", err)
 		}
 
-		flag.LogIfVerbose("Processing directory: %s\n", repoPath)
+		flag.LogIfVerbose("Processing directory: %s\n", path)
 
-		if err := git.PopulateOpts(churnOpts, []string{"go"}, since, until, repoPath, excludeRegex); err != nil {
+		if err := git.PopulateOpts(churnOpts, []string{"go"}, since, until, path, excludeRegex); err != nil {
 			return fmt.Errorf("failed to create options: %w", err)
 		}
 
 		flag.LogIfVerbose("Analyzing churn data...\n")
 
-		churns, err := git.ReadGitChurn(repoPath, churnOpts)
+		churns, err := git.ReadGitChurn(path, churnOpts)
 		if err != nil {
 			return fmt.Errorf("error getting churn metrics: %w", err)
 		}
@@ -73,7 +74,7 @@ Open generated file '.html' in a browser to view the graph.`,
 			return fmt.Errorf("failed to create options: %w", err)
 		}
 
-		complexityStats, err := complexity.RunComplexity(repoPath, complexityOpts)
+		complexityStats, err := complexity.RunComplexity(path, complexityOpts)
 		if err != nil {
 			return fmt.Errorf("error running complexity analysis: %w", err)
 		}

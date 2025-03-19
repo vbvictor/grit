@@ -27,15 +27,18 @@ var CoverageCmd = &cobra.Command{ //nolint:exhaustruct // no need to set all fie
 	Short: "Finds files with the least unit-test coverage",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(_ *cobra.Command, args []string) error {
-		repoPath := filepath.ToSlash(filepath.Clean(args[0]))
+		path := filepath.Clean(args[0])
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			return fmt.Errorf("repository does not exist: %w", err)
+		}
 
-		flag.LogIfVerbose("Processing directory: %s\n", repoPath)
+		flag.LogIfVerbose("Processing directory: %s\n", path)
 
 		if err := coverage.PopulateOpts(coverageOpts, excludeCoverageRegex); err != nil {
 			return fmt.Errorf("failed to create options: %w", err)
 		}
 
-		covData, err := coverage.GetCoverageData(repoPath, coverageOpts)
+		covData, err := coverage.GetCoverageData(path, coverageOpts)
 		if err != nil {
 			return fmt.Errorf("failed to get coverage data: %w", err)
 		}

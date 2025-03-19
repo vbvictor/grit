@@ -25,9 +25,9 @@ var ComplexityCmd = &cobra.Command{ //nolint:exhaustruct // no need to set all f
 	Short: "Finds the most complex files",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(_ *cobra.Command, args []string) error {
-		path, err := filepath.Abs(args[0])
-		if err != nil {
-			return fmt.Errorf("error getting absolute path: %w", err)
+		path := filepath.Clean(args[0])
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			return fmt.Errorf("repository does not exist: %w", err)
 		}
 
 		flag.LogIfVerbose("Processing repository: %s\n", path)
