@@ -71,8 +71,7 @@ func TestPrintTabular(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			var buf bytes.Buffer
 
-			err := PrintTabular(tc.input, &buf, &Options{})
-			require.NoError(t, err)
+			PrintTabular(tc.input, &buf, &Options{})
 
 			output := buf.String()
 			for _, exp := range tc.expected {
@@ -135,13 +134,13 @@ func TestPrintCSV(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			var buf bytes.Buffer
 
-			err := PrintCSV(tc.input, &buf, &Options{})
-			require.NoError(t, err)
+			PrintCSV(tc.input, &buf, &Options{})
 
 			output := buf.String()
 			lines := strings.Split(output, "\n")
 
 			require.Equal(t, len(tc.expected), len(lines)-1) // -1 for trailing newline
+
 			for i, exp := range tc.expected {
 				require.Equal(t, exp, lines[i])
 			}

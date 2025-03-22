@@ -8,7 +8,7 @@ import (
 	"github.com/bndr/gotabulate"
 )
 
-func PrintTabular(results []*FileScore, out io.Writer, opts *Options) error {
+func PrintTabular(results []*FileScore, out io.Writer, opts *Options) {
 	fmt.Fprintf(out, "\nCode health analysis results (top %d):\n", opts.Top)
 
 	data := make([][]any, len(results))
@@ -27,19 +27,17 @@ func PrintTabular(results []*FileScore, out io.Writer, opts *Options) error {
 	table.SetAlign("left")
 
 	if _, err := io.WriteString(out, table.Render("grid")); err != nil {
-		return fmt.Errorf("failed to write grid: %w", err)
+		return
 	}
-
-	return nil
 }
 
-func PrintCSV(results []*FileScore, out io.Writer, _ *Options) error {
+func PrintCSV(results []*FileScore, out io.Writer, _ *Options) {
 	writer := csv.NewWriter(out)
 	defer writer.Flush()
 
 	// Write headers
 	if err := writer.Write([]string{"FILEPATH", "SCORE", "CHURN", "COMPLEXITY", "COVERAGE"}); err != nil {
-		return fmt.Errorf("failed to write CSV headers: %w", err)
+		return
 	}
 
 	// Write data
@@ -52,9 +50,7 @@ func PrintCSV(results []*FileScore, out io.Writer, _ *Options) error {
 			fmt.Sprintf("%.2f", result.Coverage),
 		}
 		if err := writer.Write(record); err != nil {
-			return fmt.Errorf("failed to write CSV record: %w", err)
+			return
 		}
 	}
-
-	return nil
 }

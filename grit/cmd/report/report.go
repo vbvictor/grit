@@ -140,7 +140,7 @@ func printReport(results []*report.FileScore, out io.Writer, opts *report.Option
 	case flag.CSV:
 		report.PrintCSV(results, out, opts)
 	case flag.Tabular:
-		report.PrintTable(results, out, opts)
+		report.PrintTabular(results, out, opts)
 	default:
 		return fmt.Errorf("unsupported output format: %s", format)
 	}
