@@ -71,14 +71,79 @@ func TestPrintTabular(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			var buf bytes.Buffer
 
-			err := printTabular(tc.input, &buf, Options{})
+			err := PrintTabular(tc.input, &buf, &Options{})
 			require.NoError(t, err)
 
 			output := buf.String()
 			for _, exp := range tc.expected {
-				if !strings.Contains(output, exp) {
-					t.Errorf("Expected output to contain %q, but it didn't.\nGot: %s", exp, output)
-				}
+				require.Contains(t, output, exp,
+					"Expected output to contain %q, but it didn't.\nGot: %s", exp, output)
+			}
+		})
+	}
+}
+
+func TestPrintCSV(t *testing.T) {
+	testCases := []struct {
+		name     string
+		input    []*FileScore
+		expected []string
+	}{
+		{
+			name: "single file score",
+			input: []*FileScore{
+				{
+					File:       "main.go",
+					Coverage:   75.5,
+					Complexity: 4.2,
+					Churn:      100,
+					Score:      42.5,
+				},
+			},
+			expected: []string{
+				"FILEPATH,SCORE,CHURN,COMPLEXITY,COVERAGE",
+				"main.go,42.50,100.00,4.20,75.50",
+			},
+		},
+		{
+			name: "multiple files score",
+			input: []*FileScore{
+				{
+					File:       "path/to/foo.go",
+					Coverage:   90.0,
+					Complexity: 2.5,
+					Churn:      50,
+					Score:      20.5,
+				},
+				{
+					File:       "bar.go",
+					Coverage:   60.5,
+					Complexity: 6.0,
+					Churn:      150,
+					Score:      85.2,
+				},
+			},
+			expected: []string{
+				"FILEPATH,SCORE,CHURN,COMPLEXITY,COVERAGE",
+				"path/to/foo.go,20.50,50.00,2.50,90.00",
+				"bar.go,85.20,150.00,6.00,60.50",
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var buf bytes.Buffer
+
+			err := PrintCSV(tc.input, &buf, &Options{})
+			require.NoError(t, err)
+
+			output := buf.String()
+			lines := strings.Split(output, "\n")
+
+			require.Equal(t, len(tc.expected), len(lines)-1) // -1 for trailing newline
+			for i, exp := range tc.expected {
+				require.Equal(t, exp, lines[i])
 			}
 		})
 	}
