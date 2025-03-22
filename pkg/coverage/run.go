@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strings"
 
 	"github.com/vbvictor/grit/grit/cmd/flag"
 	"golang.org/x/tools/cover"
@@ -132,7 +133,7 @@ func ReadCoverage(path, file string, opts *Options) ([]*FileCoverage, error) {
 		}
 
 		results = append(results, &FileCoverage{
-			File:       extractRelativePath(profile.FileName, path),
+			File:       extractRelativePath(profile.FileName),
 			Coverage:   coverage,
 			Statements: total,
 			Covered:    covered,
@@ -142,15 +143,22 @@ func ReadCoverage(path, file string, opts *Options) ([]*FileCoverage, error) {
 	return results, nil
 }
 
-func extractRelativePath(fullPath, targetDir string) string {
+const minPathPaths = 3
+
+func extractRelativePath(fullPath string) string {
+	// Convert to consistent path format
 	fullPath = filepath.FromSlash(fullPath)
 
-	// tmm := filepath.Rel(, targpath string)
+	// Split the path by separator
+	parts := strings.Split(fullPath, string(os.PathSeparator))
 
-	flag.LogIfVerbose("%s:%s\n", fullPath, targetDir)
-	pp, err := filepath.Abs(targetDir)
-	flag.LogIfVerbose("%s:%s\n", pp, err)
+	// If we have at least 3 components (typically github.com/username/module/...)
+	if len(parts) >= minPathPaths {
+		// Skip the first two components (domain and username)
+		return filepath.Join(parts[minPathPaths-1:]...)
+	}
 
+	// Fallback to original path if it doesn't have enough components
 	return fullPath
 }
 

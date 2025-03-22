@@ -1,7 +1,11 @@
 package test
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 // To run these integration tests, you need to have following:
@@ -9,119 +13,79 @@ import (
 // 		You can install it via go install.
 // 		You can download it from https://github.com/vbvictor/grit/releases and place it in your PATH.
 
+func createTempRepo(t *testing.T) (tempPath, gritPath string) {
+	t.Helper()
+
+	tempDir := t.TempDir()
+	gritDir := filepath.Join(tempDir, "grit")
+	err := os.MkdirAll(gritDir, 0o755)
+	require.NoError(t, err)
+
+	return tempDir, gritDir
+}
+
 func TestGritBasicFunctionality(t *testing.T) {
-	targetDir := `C:\Users\Victor\repos\grit`
+	_, gritDir := createTempRepo(t)
 
 	tests := []GritTest{
 		{
-			Name:      "Basic run with default settings",
-			RunDir:    targetDir,
-			Args:      []string{},
-			Validator: NoopValidator,
-		},
-		{
-			Name:      "Run with CSV output format",
-			RunDir:    targetDir,
-			Args:      []string{"--format", "csv"},
-			Validator: NoopValidator,
-		},
-		{
-			Name:      "Run with specific engine",
-			RunDir:    targetDir,
-			Args:      []string{"--engine", "gocyclo"},
-			Validator: NoopValidator,
-		},
-		{
-			Name:      "Run with plot output",
-			RunDir:    targetDir,
-			Args:      []string{"--plot", "complexity_chart.html"},
-			Validator: NoopValidator,
-		},
-		{
-			Name:      "Run with output file",
-			RunDir:    targetDir,
-			Args:      []string{"--output", "analysis_output.txt"},
-			Validator: NoopValidator,
-		},
-		{
-			Name:      "Run with help flag",
-			RunDir:    targetDir,
-			Args:      []string{"--help"},
-			Validator: ContainsValidator,
-		},
-	}
-
-	RunGritTests(t, tests)
-}
-
-func TestGritAdvancedUsage(t *testing.T) {
-	// Target directory to analyze
-	targetDir := `C:\Users\Victor\repos\fasthttp`
-
-	tests := []GritTest{
-		{
-			Name:      "Run with file pattern",
-			RunDir:    targetDir,
-			Args:      []string{"--include", "*.go"},
-			Validator: NoopValidator,
-		},
-		{
-			Name:      "Run with exclusion pattern",
-			RunDir:    targetDir,
-			Args:      []string{"--exclude", "vendor/"},
-			Validator: NoopValidator,
-		},
-		{
-			Name:      "Run with threshold",
-			RunDir:    targetDir,
-			Args:      []string{"--threshold", "10"},
-			Validator: NoopValidator,
-		},
-		{
-			Name:      "Run with verbose output",
-			RunDir:    targetDir,
-			Args:      []string{"--verbose"},
-			Validator: NoopValidator,
-		},
-		{
-			Name:      "Run with combination of options",
-			RunDir:    targetDir,
-			Args:      []string{"--format", "csv", "--output", "output.csv", "--exclude", "vendor/"},
-			Validator: NoopValidator,
-		},
-	}
-
-	RunGritTests(t, tests)
-}
-
-func TestGritErrorCases(t *testing.T) {
-	// Target directory to analyze
-	targetDir := `C:\Users\Victor\repos\fasthttp`
-
-	// Test with non-existent directory
-	nonExistentDir := `C:\Users\Victor\repos\non_existent_dir`
-
-	tests := []GritTest{
-		{
-			Name:        "Run with invalid format option",
-			RunDir:      targetDir,
-			Args:        []string{"--format", "invalid_format"},
-			ExpectError: true,
-			Validator:   ContainsValidator,
-		},
-		{
-			Name:        "Run with non-existent directory",
-			RunDir:      nonExistentDir,
+			Name:        "Run no params",
+			RunDir:      gritDir,
 			Args:        []string{},
-			ExpectError: true,
-			Validator:   NoopValidator,
+			Validator:   NewContainsValidator("GRIT is an all-in-one cli tool"),
+			ExpectError: false,
 		},
 		{
-			Name:        "Run with invalid engine",
-			RunDir:      targetDir,
-			Args:        []string{"--engine", "invalid_engine"},
-			ExpectError: true,
-			Validator:   ContainsValidator,
+			Name:        "Run general help",
+			RunDir:      gritDir,
+			Args:        []string{"--help"},
+			Validator:   NewContainsValidator(`Use "grit [command] --help" for more information about a command.`),
+			ExpectError: false,
+		},
+		{
+			Name:        "Run plot help",
+			RunDir:      gritDir,
+			Args:        []string{"plot", "--help"},
+			Validator:   NewContainsValidator(`Creates visual graphs for code metrics.`),
+			ExpectError: false,
+		},
+		{
+			Name:        "Run report help",
+			RunDir:      gritDir,
+			Args:        []string{"report", "--help"},
+			Validator:   NewContainsValidator(`Creates maintainability report based on churn, complexity and coverage`),
+			ExpectError: false,
+		},
+		{
+			Name:   "Run stat help",
+			RunDir: gritDir,
+			Args:   []string{"stat", "--help"},
+			Validator: NewContainsValidator(`Calculate code metrics`,
+				`Finds files with the most changes in git repository`,
+				`Finds the most complex files`,
+				`Finds files with the least unit-test coverage`),
+			ExpectError: false,
+		},
+		{
+			Name:        "Run stat churn help",
+			RunDir:      gritDir,
+			Args:        []string{"stat", "churn", "--help"},
+			Validator:   NewContainsValidator(`Finds files with the most changes in git repository`),
+			ExpectError: false,
+		},
+		{
+			Name:        "Run stat complexity help",
+			RunDir:      gritDir,
+			Args:        []string{"stat", "complexity", "--help"},
+			Validator:   NewContainsValidator(`Finds the most complex files`),
+			ExpectError: false,
+		},
+		{
+			Name:        "Run stat coverage help",
+			RunDir:      gritDir,
+			Args:        []string{"stat", "coverage", "--help"},
+			Validator:   NewContainsValidator(`Finds files with the least unit-test coverage`),
+			ExpectError: false,
 		},
 	}
 
