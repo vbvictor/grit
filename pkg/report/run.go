@@ -53,7 +53,7 @@ func calculateScore(fileScore *FileScore, perfectCoverage float64) {
 	}
 }
 
-func SortByScore(files []*FileScore) []*FileScore {
+func SortAndLimit(files []*FileScore, top int) []*FileScore {
 	slices.SortFunc(files, func(lhs *FileScore, rhs *FileScore) int {
 		if lhs.Score < rhs.Score {
 			return 1
@@ -65,6 +65,10 @@ func SortByScore(files []*FileScore) []*FileScore {
 
 		return 0
 	})
+
+	if top > 0 && top < len(files) {
+		files = files[:top]
+	}
 
 	return files
 }

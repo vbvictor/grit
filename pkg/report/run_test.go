@@ -141,7 +141,7 @@ func TestCalculateScores(t *testing.T) {
 	}
 }
 
-func TestSortByScore(t *testing.T) {
+func TestSortAndLimit(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    []*FileScore
@@ -195,7 +195,7 @@ func TestSortByScore(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := SortByScore(tt.input)
+			got := SortAndLimit(tt.input, 10)
 			assert.Equal(t, tt.expected, got)
 		})
 	}

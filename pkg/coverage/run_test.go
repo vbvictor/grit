@@ -35,9 +35,9 @@ func TestReadCoverage(t *testing.T) {
 		{
 			name: "Valid set mode coverage",
 			content: `mode: set
-example.com/name/path1/file1.go:10.20,30.2 3 1
-example.com/name/path1/file1.go:32.20,35.2 2 0
-example.com/name/path1/path2/file2.go:5.20,8.2 2 1`,
+example.com/name/module/path1/file1.go:10.20,30.2 3 1
+example.com/name/module/path1/file1.go:32.20,35.2 2 0
+example.com/name/module/path1/path2/file2.go:5.20,8.2 2 1`,
 			want: []*FileCoverage{
 				{
 					File:       filepath.Join("path1", "path2", "file2.go"),
@@ -56,13 +56,13 @@ example.com/name/path1/path2/file2.go:5.20,8.2 2 1`,
 		{
 			name: "Unsupported count mode",
 			content: `mode: count
-example.com/name/file1.go:10.20,30.2 3 1`,
+example.com/name/module/file1.go:10.20,30.2 3 1`,
 			wantErr: errUnsupportedMode,
 		},
 		{
 			name: "Unsupported atomic mode",
 			content: `mode: atomic
-example.com/name/file1.go:10.20,30.2 3 1`,
+example.com/name/module/file1.go:10.20,30.2 3 1`,
 			wantErr: errUnsupportedMode,
 		},
 	}
@@ -100,9 +100,9 @@ func TestExcludeRegex(t *testing.T) {
 			name:         "exclude simple",
 			excludeRegex: regexp.MustCompile(`path2/`),
 			content: `mode: set
-example.com/name/path1/file1.go:10.20,30.2 3 1
-example.com/name/path2/file2.go:5.20,8.2 2 1
-example.com/name/cmd/app.go:15.30,20.2 3 1`,
+example.com/name/module/path1/file1.go:10.20,30.2 3 1
+example.com/name/module/path2/file2.go:5.20,8.2 2 1
+example.com/name/module/cmd/app.go:15.30,20.2 3 1`,
 			want: []*FileCoverage{
 				{
 					File:       filepath.Join("path1", "file1.go"),
@@ -122,10 +122,10 @@ example.com/name/cmd/app.go:15.30,20.2 3 1`,
 			name:         "exclude many patterns",
 			excludeRegex: regexp.MustCompile(`/testdata/|/pkg/`),
 			content: `mode: set
-example.com/name/pkg/file1.go:10.20,30.2 3 1
-example.com/name/pkg/file2.go:10.20,30.2 3 1
-example.com/name/testdata/file2.go:5.20,8.2 2 1
-example.com/name/cmd/app.go:15.30,20.2 3 1`,
+example.com/name/module/pkg/file1.go:10.20,30.2 3 1
+example.com/name/module/pkg/file2.go:10.20,30.2 3 1
+example.com/name/module/testdata/file2.go:5.20,8.2 2 1
+example.com/name/module/cmd/app.go:15.30,20.2 3 1`,
 			want: []*FileCoverage{
 				{
 					File:       filepath.Join("cmd", "app.go"),
@@ -139,8 +139,8 @@ example.com/name/cmd/app.go:15.30,20.2 3 1`,
 			name:         "no matches",
 			excludeRegex: regexp.MustCompile(`\.js$`),
 			content: `mode: set
-example.com/name/file1.go:10.20,30.2 3 1
-example.com/name/file2.go:5.20,8.2 2 1`,
+example.com/name/module/file1.go:10.20,30.2 3 1
+example.com/name/module/file2.go:5.20,8.2 2 1`,
 			want: []*FileCoverage{
 				{
 					File:       "file1.go",

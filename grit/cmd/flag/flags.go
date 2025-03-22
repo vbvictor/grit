@@ -120,8 +120,8 @@ func ExcludeRegexFlag(f *pflag.FlagSet, excludeRegex *string) {
 }
 
 func ChurnTypeFlag(f *pflag.FlagSet, churnType *string, defaultValue string) {
-	f.StringVarP(churnType, "churn-type", "t", defaultValue,
-		fmt.Sprintf("Specify churn type for plotting: [%s, %s]", git.Changes, git.Commits))
+	f.StringVar(churnType, "churn-type", defaultValue,
+		fmt.Sprintf("Specify churn type: [%s, %s]", git.Changes, git.Commits))
 }
 
 func SinceFlag(f *pflag.FlagSet, since *string) {

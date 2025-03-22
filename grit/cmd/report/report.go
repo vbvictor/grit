@@ -14,10 +14,6 @@ import (
 	"github.com/vbvictor/grit/pkg/report"
 )
 
-const (
-	DefaultTop = 10
-)
-
 var (
 	excludeRegex string
 	top          int
@@ -26,7 +22,7 @@ var (
 )
 
 var churnOpts = &git.ChurnOptions{
-	SortBy:       git.Changes,
+	SortBy:       git.Commits,
 	Top:          0,
 	Extensions:   nil,
 	Since:        time.Time{},
@@ -50,7 +46,7 @@ var coverageOpts = &coverage.Options{
 }
 
 var reportOpts = report.Options{
-	Top:              DefaultTop,
+	Top:              flag.DefaultTop,
 	ExcludePath:      "",
 	ChurnFactor:      1.0,
 	ComplexityFactor: 1.0,
@@ -105,7 +101,7 @@ var ReportCmd = &cobra.Command{
 		flag.LogIfVerbose("Got %d coverage files\n", len(covData))
 
 		fileScores := report.CombineMetrics(churns, complexityStats, covData)
-		fileScores = report.SortByScore(report.CalculateScores(fileScores, reportOpts))
+		fileScores = report.SortAndLimit(report.CalculateScores(fileScores, reportOpts), top)
 		flag.LogIfVerbose("Got %d file scores\n", len(fileScores))
 
 		return report.PrintStats(fileScores, os.Stdout, reportOpts)
@@ -123,6 +119,7 @@ func init() {
 	// Churn flags
 	flag.SinceFlag(flags, &since)
 	flag.UntilFlag(flags, &until)
+	flag.ChurnTypeFlag(flags, &churnOpts.SortBy, git.Commits)
 
 	// Complexity flags
 	flag.ComplexityEngineFlag(flags, &complexityOpts.Engine)

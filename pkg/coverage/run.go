@@ -153,9 +153,9 @@ func extractRelativePath(fullPath string) string {
 	parts := strings.Split(fullPath, string(os.PathSeparator))
 
 	// If we have at least 3 components (typically github.com/username/module/...)
-	if len(parts) >= minPathPaths {
+	if len(parts) > minPathPaths {
 		// Skip the first two components (domain and username)
-		return filepath.Join(parts[minPathPaths-1:]...)
+		return filepath.Join(parts[minPathPaths:]...)
 	}
 
 	// Fallback to original path if it doesn't have enough components
