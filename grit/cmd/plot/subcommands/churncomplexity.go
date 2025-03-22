@@ -2,6 +2,7 @@ package plot
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -47,20 +48,20 @@ Open generated file '.html' in a browser to view the graph.`,
 		return plot.ValidateRiskThresholds()
 	},
 	RunE: func(_ *cobra.Command, args []string) error {
-		repoPath, err := filepath.Abs(args[0])
-		if err != nil {
-			return fmt.Errorf("error getting absolute path: %w", err)
+		path := filepath.Clean(args[0])
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			return fmt.Errorf("repository does not exist: %w", err)
 		}
 
-		flag.LogIfVerbose("Processing directory: %s\n", repoPath)
+		flag.LogIfVerbose("Processing directory: %s\n", path)
 
-		if err := git.PopulateOpts(churnOpts, []string{"go"}, since, until, repoPath, excludeRegex); err != nil {
+		if err := git.PopulateOpts(churnOpts, []string{"go"}, since, until, path, excludeRegex); err != nil {
 			return fmt.Errorf("failed to create options: %w", err)
 		}
 
 		flag.LogIfVerbose("Analyzing churn data...\n")
 
-		churns, err := git.ReadGitChurn(repoPath, churnOpts)
+		churns, err := git.ReadGitChurn(path, churnOpts)
 		if err != nil {
 			return fmt.Errorf("error getting churn metrics: %w", err)
 		}
@@ -73,7 +74,7 @@ Open generated file '.html' in a browser to view the graph.`,
 			return fmt.Errorf("failed to create options: %w", err)
 		}
 
-		complexityStats, err := complexity.RunComplexity(repoPath, complexityOpts)
+		complexityStats, err := complexity.RunComplexity(path, complexityOpts)
 		if err != nil {
 			return fmt.Errorf("error running complexity analysis: %w", err)
 		}
@@ -96,20 +97,20 @@ func init() {
 	flags := ChurnComplexityCmd.PersistentFlags()
 
 	// Common flags
-	flags.BoolVarP(&flag.Verbose, flag.LongVerbose, flag.ShortVerbose, false, "Show detailed progress")
-	flags.StringVarP(&outputFile, "output", "o", "complexity_churn.html", "Output graph file name")
-	flags.StringVar(&excludeRegex, flag.LongExclude, "", "Exclude files matching regex pattern")
-
-	flags.StringVarP(&churnType, "churn-type", "t", git.Commits,
-		fmt.Sprintf("Specify churn type for plotting: [%s, %s]", git.Changes, git.Commits))
+	flag.VerboseFlag(flags, &flag.Verbose)
+	flag.OutputFlag(flags, &outputFile, "complexity_churn.html")
+	flag.ExcludeRegexFlag(flags, &excludeRegex)
+	flag.ChurnTypeFlag(flags, &churnType, git.Commits)
 
 	// Churn flags
-	flags.StringVarP(&since, flag.LongSince, flag.ShortSince, "", "Start date for analysis in format 'YYYY-MM-DD'")
-	flags.StringVarP(&until, flag.LongUntil, flag.ShortUntil, "", "End date for analysis in format 'YYYY-MM-DD'")
+	flag.SinceFlag(flags, &since)
+	flag.UntilFlag(flags, &until)
 
 	// Complexity flags
-	flags.StringVarP(&complexityOpts.Engine, flag.LongEngine, flag.ShortEngine, complexity.Gocyclo,
-		fmt.Sprintf("Specify complexity calculation engine: [%s, %s]", complexity.Gocyclo, complexity.Gocognit))
+	flag.EngineFlag(flags, &complexityOpts.Engine, complexity.Gocyclo)
+
+	ChurnComplexityCmd.Flag(flag.LongUntil).DefValue = flag.DefaultUntil
+	ChurnComplexityCmd.Flag(flag.LongSince).DefValue = flag.DefaultSince
 
 	ChurnComplexityCmd.Flag(flag.LongUntil).DefValue = flag.DefaultUntil
 	ChurnComplexityCmd.Flag(flag.LongSince).DefValue = flag.DefaultSince

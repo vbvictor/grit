@@ -73,7 +73,7 @@ func TestPrintTable(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			var buf bytes.Buffer
 
-			printTable(tc.input, &buf, tc.opts)
+			PrintTable(tc.input, &buf, tc.opts)
 
 			output := buf.String()
 			for _, exp := range tc.expected {
@@ -146,7 +146,7 @@ func TestPrintCSV(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			var buf bytes.Buffer
 
-			printCSV(tc.input, &buf, &ChurnOptions{})
+			PrintCSV(tc.input, &buf, &ChurnOptions{})
 
 			reader := csv.NewReader(bytes.NewReader(buf.Bytes()))
 			output, err := reader.ReadAll()

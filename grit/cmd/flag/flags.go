@@ -3,6 +3,10 @@ package flag
 import (
 	"errors"
 	"fmt"
+
+	"github.com/spf13/pflag"
+	"github.com/vbvictor/grit/pkg/complexity"
+	"github.com/vbvictor/grit/pkg/git"
 )
 
 // Global flags used across all commands
@@ -40,9 +44,9 @@ var (
 	AvailableOutputFormats            = []OutputType{Tabular, CSV}
 
 	// Coverage Run formats.
-	Always = "Always"
-	Never  = "Never"
-	Auto   = "Auto"
+	Always = "always"
+	Never  = "never"
+	Auto   = "auto"
 
 	OutputFormat OutputType
 )
@@ -65,7 +69,7 @@ const (
 	LongUntil        = "until"
 	LongFormat       = "format"
 	LongEngine       = "engine"
-	LongRunCoverage  = "run"
+	LongRunCoverage  = "run-tests"
 	LongFileCoverage = "coverage"
 
 	// Flag shortcuts.
@@ -82,16 +86,6 @@ const (
 	DefaultUntil = "current date"
 	DefaultSince = "one year ago"
 )
-
-func GetExtMap(extensions []string) map[string]struct{} {
-	extMap := make(map[string]struct{})
-
-	for _, ext := range extensions {
-		extMap[ext] = struct{}{}
-	}
-
-	return extMap
-}
 
 func LogIfVerbose(format string, args ...any) {
 	if Verbose {
@@ -112,3 +106,79 @@ var (
 	ErrReadCoverage     = errors.New("failed to read coverage file")
 	ErrRunCoverage      = errors.New("failed to run coverage")
 )
+
+func VerboseFlag(f *pflag.FlagSet, verbose *bool) {
+	f.BoolVarP(verbose, LongVerbose, ShortVerbose, false, "Show detailed progress")
+}
+
+func OutputFlag(f *pflag.FlagSet, output *string, defaultValue string) {
+	f.StringVarP(output, "output", "o", defaultValue, "Output graph file name")
+}
+
+func ExcludeRegexFlag(f *pflag.FlagSet, excludeRegex *string) {
+	f.StringVar(excludeRegex, LongExclude, "", "Exclude files matching regex pattern")
+}
+
+func ChurnTypeFlag(f *pflag.FlagSet, churnType *string, defaultValue string) {
+	f.StringVar(churnType, "churn-type", defaultValue,
+		fmt.Sprintf("Specify churn type: [%s, %s]", git.Changes, git.Commits))
+}
+
+func SinceFlag(f *pflag.FlagSet, since *string) {
+	f.StringVarP(since, LongSince, ShortSince, "", "Start date for analysis in format 'YYYY-MM-DD'")
+}
+
+func UntilFlag(f *pflag.FlagSet, until *string) {
+	f.StringVarP(until, LongUntil, ShortUntil, "", "End date for analysis in format 'YYYY-MM-DD'")
+}
+
+func EngineFlag(f *pflag.FlagSet, engine *string, defaultValue string) {
+	f.StringVarP(engine, LongEngine, ShortEngine, defaultValue,
+		fmt.Sprintf("Specify complexity calculation engine: [%s, %s]", complexity.Gocyclo, complexity.Gocognit))
+}
+
+func SortFlag(f *pflag.FlagSet, sortBy *string, defaultValue string, description string) { //nolint: gocritic // unified
+	f.StringVar(sortBy, LongSort, defaultValue, description)
+}
+
+func RunCoverageFlag(f *pflag.FlagSet, runCoverage *string) {
+	f.StringVarP(runCoverage, LongRunCoverage, ShortRunCoverage, Auto,
+		`Specify tests run format:
+  'Auto' will run unit tests if coverage file is not found
+  'Always' will run unit tests on every invoke 'coverage' command
+  'Never' will never run unit tests and always look for present test-coverage file
+`)
+}
+
+func CoverageFilenameFlag(f *pflag.FlagSet, filename *string) {
+	f.StringVarP(filename, LongFileCoverage, ShortFileCoverage, "coverage.out",
+		"Name of code coverage file to read or create")
+}
+
+func TopFlag(f *pflag.FlagSet, top *int) {
+	f.IntVarP(top, LongTop, ShortTop, DefaultTop, "Number of top files to display")
+}
+
+func OutputFormatFlag(f *pflag.FlagSet, format *string) {
+	f.StringVarP(format, LongFormat, ShortFormat, Tabular,
+		fmt.Sprintf("Specify output format: [%s, %s]", Tabular, CSV))
+}
+
+func ExtensionsFlag(f *pflag.FlagSet, extensions *[]string) {
+	f.StringSliceVarP(extensions, LongExtensions, ShortExt, nil,
+		"Only include files with given extensions in comma-separated list, e.g. 'go,h,c'")
+}
+
+func ComplexityEngineFlag(f *pflag.FlagSet, engine *string) {
+	f.StringVarP(engine, LongEngine, ShortEngine, complexity.Gocyclo,
+		fmt.Sprintf(`Specify complexity calculation engine: [%s, %s, %s].
+When CSV engine is specified, GRIT will try to read function complexity data from CSV file
+'complexity.csv' located in <path>. The file should have following fields:
+"filename,function,complexity,line-count (optional),packages (optional)"
+`, complexity.Gocyclo, complexity.Gocognit, complexity.CSV))
+}
+
+func PerfectCoverageFlag(f *pflag.FlagSet, perfectCoverage *float64) {
+	f.Float64Var(perfectCoverage, "perfect-coverage", 100.0, //nolint:mnd // default value
+		"Specify code coverage penalty threshold")
+}

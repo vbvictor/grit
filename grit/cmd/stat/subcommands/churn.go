@@ -2,6 +2,7 @@ package stat
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"time"
@@ -26,7 +27,6 @@ var (
 	extensionList     []string
 	since             string
 	until             string
-	repoPath          string
 	excludeChurnRegex string
 )
 
@@ -35,44 +35,54 @@ var ChurnCmd = &cobra.Command{ //nolint:exhaustruct // no need to set all fields
 	Short: "Finds files with the most changes in git repository",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(_ *cobra.Command, args []string) error {
-		var err error
-		repoPath, err = filepath.Abs(args[0])
-		if err != nil {
-			return fmt.Errorf("error getting absolute path: %w", err)
+		path := filepath.Clean(args[0])
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			return fmt.Errorf("repository does not exist: %w", err)
 		}
 
-		flag.LogIfVerbose("Processing repository: %s\n", repoPath)
+		flag.LogIfVerbose("Processing repository: %s\n", path)
 
-		if err := git.PopulateOpts(churnOpts, extensionList, since, until, repoPath, excludeChurnRegex); err != nil {
+		if err := git.PopulateOpts(churnOpts, extensionList, since, until, path, excludeChurnRegex); err != nil {
 			return fmt.Errorf("failed to create options: %w", err)
 		}
 
-		churns, err := git.ReadGitChurn(repoPath, churnOpts)
+		churns, err := git.ReadGitChurn(path, churnOpts)
 		if err != nil {
 			return fmt.Errorf("error getting churn metrics: %w", err)
 		}
 
 		churns = git.SortAndLimit(churns, churnOpts.SortBy, churnOpts.Top)
 
-		return git.PrintStats(churns, os.Stdout, churnOpts)
+		return printChurnStats(churns, os.Stdout, churnOpts)
 	},
 }
 
 func init() {
 	flags := ChurnCmd.PersistentFlags()
 
-	flags.StringVar(&churnOpts.SortBy, flag.LongSort, git.Commits,
+	flag.SortFlag(flags, &churnOpts.SortBy, git.Commits,
 		fmt.Sprintf("Specify churn sort type: [%s, %s, %s, %s]", git.Changes, git.Additions, git.Deletions, git.Commits))
-	flags.IntVarP(&churnOpts.Top, flag.LongTop, flag.ShortTop, git.DefaultTop, "Number of top files to display")
-	flags.BoolVarP(&flag.Verbose, flag.LongVerbose, flag.ShortVerbose, false, "Show detailed progress")
-	flags.StringVarP(&churnOpts.OutputFormat, flag.LongFormat, flag.ShortFormat, flag.Tabular,
-		fmt.Sprintf("Specify output format: [%s, %s]", flag.Tabular, flag.CSV))
-	flags.StringVar(&excludeChurnRegex, flag.LongExclude, "", "Exclude files matching regex pattern")
-	flags.StringSliceVarP(&extensionList, flag.LongExtensions, flag.ShortExt, nil,
-		"Only include files with given extensions in comma-separated list, e.g. 'go,h,c'")
-	flags.StringVarP(&since, flag.LongSince, flag.ShortSince, "", "Start date for analysis in format 'YYYY-MM-DD'")
-	flags.StringVarP(&until, flag.LongUntil, flag.ShortUntil, "", "End date for analysis in format 'YYYY-MM-DD'")
+	flag.TopFlag(flags, &churnOpts.Top)
+	flag.VerboseFlag(flags, &flag.Verbose)
+	flag.OutputFormatFlag(flags, &churnOpts.OutputFormat)
+	flag.ExcludeRegexFlag(flags, &excludeChurnRegex)
+	flag.ExtensionsFlag(flags, &extensionList)
+	flag.SinceFlag(flags, &since)
+	flag.UntilFlag(flags, &until)
 
 	ChurnCmd.Flag(flag.LongUntil).DefValue = flag.DefaultUntil
 	ChurnCmd.Flag(flag.LongSince).DefValue = flag.DefaultSince
+}
+
+func printChurnStats(results []*git.ChurnChunk, out io.Writer, opts *git.ChurnOptions) error {
+	switch opts.OutputFormat {
+	case flag.CSV:
+		git.PrintCSV(results, out, opts)
+	case flag.Tabular:
+		git.PrintTable(results, out, opts)
+	default:
+		return fmt.Errorf("unsupported output format: %s", opts.OutputFormat)
+	}
+
+	return nil
 }

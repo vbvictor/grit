@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strings"
 
 	"github.com/vbvictor/grit/grit/cmd/flag"
 	"golang.org/x/tools/cover"
@@ -90,7 +91,7 @@ func GetCoverageData(repoPath string, coverageOpts *Options) ([]*FileCoverage, e
 		flag.LogIfVerbose("Coverage file %s created\n", coveragePath)
 	}
 
-	covData, err := ReadCoverage(filepath.Join(repoPath, coverageOpts.CoverageFilename), coverageOpts)
+	covData, err := ReadCoverage(repoPath, coverageOpts.CoverageFilename, coverageOpts)
 	if err != nil {
 		return nil, errors.Join(flag.ErrReadCoverage, err)
 	}
@@ -98,8 +99,8 @@ func GetCoverageData(repoPath string, coverageOpts *Options) ([]*FileCoverage, e
 	return covData, nil
 }
 
-func ReadCoverage(coverageFile string, opts *Options) ([]*FileCoverage, error) {
-	profiles, err := cover.ParseProfiles(coverageFile)
+func ReadCoverage(path, file string, opts *Options) ([]*FileCoverage, error) {
+	profiles, err := cover.ParseProfiles(filepath.Join(path, file))
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse profiles data: %w", err)
 	}
@@ -132,7 +133,7 @@ func ReadCoverage(coverageFile string, opts *Options) ([]*FileCoverage, error) {
 		}
 
 		results = append(results, &FileCoverage{
-			File:       profile.FileName,
+			File:       extractRelativePath(profile.FileName),
 			Coverage:   coverage,
 			Statements: total,
 			Covered:    covered,
@@ -140,6 +141,25 @@ func ReadCoverage(coverageFile string, opts *Options) ([]*FileCoverage, error) {
 	}
 
 	return results, nil
+}
+
+const minPathPaths = 3
+
+func extractRelativePath(fullPath string) string {
+	// Convert to consistent path format
+	fullPath = filepath.FromSlash(fullPath)
+
+	// Split the path by separator
+	parts := strings.Split(fullPath, string(os.PathSeparator))
+
+	// If we have at least 3 components (typically github.com/username/module/...)
+	if len(parts) > minPathPaths {
+		// Skip the first two components (domain and username)
+		return filepath.Join(parts[minPathPaths:]...)
+	}
+
+	// Fallback to original path if it doesn't have enough components
+	return fullPath
 }
 
 func SortAndLimit(result []*FileCoverage, sortBy SortType, limit int) []*FileCoverage {
@@ -167,9 +187,10 @@ func RunCoverage(repoPath, coverageFile string) error {
 	cmd := exec.Command( //nolint:gosec // go test is allowed command
 		"go",
 		"test",
-		filepath.Join(repoPath, "..."),
+		"./...",
 		"-v",
 		"-coverprofile="+coverageFile)
+	cmd.Dir = repoPath
 
 	flag.LogIfVerbose("Running command: %s\n", cmd.String())
 

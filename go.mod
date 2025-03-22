@@ -1,6 +1,6 @@
 module github.com/vbvictor/grit
 
-go 1.22.2
+go 1.23.0
 
 require (
 	github.com/bndr/gotabulate v1.1.2

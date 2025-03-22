@@ -7,23 +7,9 @@ import (
 	"strconv"
 
 	"github.com/bndr/gotabulate"
-	"github.com/vbvictor/grit/grit/cmd/flag"
 )
 
-func PrintStats(results []*ChurnChunk, out io.Writer, opts *ChurnOptions) error {
-	switch opts.OutputFormat {
-	case flag.CSV:
-		printCSV(results, out, opts)
-	case flag.Tabular:
-		printTable(results, out, opts)
-	default:
-		return fmt.Errorf("unsupported output format: %s", opts.OutputFormat)
-	}
-
-	return nil
-}
-
-func printTable(results []*ChurnChunk, out io.Writer, opts *ChurnOptions) {
+func PrintTable(results []*ChurnChunk, out io.Writer, opts *ChurnOptions) {
 	fmt.Fprintf(out, "\nTop %d most modified files by %s:\n", opts.Top, opts.SortBy)
 
 	data := make([][]any, len(results))
@@ -39,7 +25,7 @@ func printTable(results []*ChurnChunk, out io.Writer, opts *ChurnOptions) {
 	_, _ = io.WriteString(out, table.Render("grid"))
 }
 
-func printCSV(results []*ChurnChunk, out io.Writer, _ *ChurnOptions) {
+func PrintCSV(results []*ChurnChunk, out io.Writer, _ *ChurnOptions) {
 	writer := csv.NewWriter(out)
 	defer writer.Flush()
 

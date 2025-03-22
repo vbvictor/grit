@@ -2,13 +2,13 @@ package stat
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
 	"github.com/vbvictor/grit/grit/cmd/flag"
 	"github.com/vbvictor/grit/pkg/complexity"
-	"github.com/vbvictor/grit/pkg/git"
 )
 
 var complexityOpts = complexity.Options{
@@ -25,9 +25,9 @@ var ComplexityCmd = &cobra.Command{ //nolint:exhaustruct // no need to set all f
 	Short: "Finds the most complex files",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(_ *cobra.Command, args []string) error {
-		path, err := filepath.Abs(args[0])
-		if err != nil {
-			return fmt.Errorf("error getting absolute path: %w", err)
+		path := filepath.Clean(args[0])
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			return fmt.Errorf("repository does not exist: %w", err)
 		}
 
 		flag.LogIfVerbose("Processing repository: %s\n", path)
@@ -43,21 +43,29 @@ var ComplexityCmd = &cobra.Command{ //nolint:exhaustruct // no need to set all f
 
 		fileStat = complexity.SortAndLimit(fileStat, complexityOpts)
 
-		return complexity.PrintStats(fileStat, os.Stdout, &complexityOpts)
+		return printComplexityStats(fileStat, os.Stdout, &complexityOpts)
 	},
 }
 
 func init() {
 	flags := ComplexityCmd.PersistentFlags()
 
-	flags.StringVarP(&complexityOpts.Engine, flag.LongEngine, flag.ShortEngine, complexity.Gocyclo,
-		fmt.Sprintf(`Specify complexity calculation engine: [%s, %s, %s].
-When CSV engine is chosen, GRIT will try to read function complexity data from CSV file specified by <path> parameter.
-The file should have following fields: "filename,function,complexity,line-count (optional),packages (optional)"
-`, complexity.Gocyclo, complexity.Gocognit, complexity.CSV))
-	flags.IntVarP(&complexityOpts.Top, flag.LongTop, flag.ShortTop, git.DefaultTop, "Number of top files to display")
-	flags.BoolVarP(&flag.Verbose, flag.LongVerbose, flag.ShortVerbose, false, "Show detailed progress")
-	flags.StringVar(&excludeComplexityRegex, flag.LongExclude, "", "Exclude files matching regex pattern")
-	flags.StringVarP(&complexityOpts.OutputFormat, flag.LongFormat, flag.ShortFormat, flag.Tabular,
-		fmt.Sprintf("Specify output format: [%s, %s]", flag.Tabular, flag.CSV))
+	flag.ComplexityEngineFlag(flags, &complexityOpts.Engine)
+	flag.TopFlag(flags, &complexityOpts.Top)
+	flag.VerboseFlag(flags, &flag.Verbose)
+	flag.ExcludeRegexFlag(flags, &excludeComplexityRegex)
+	flag.OutputFormatFlag(flags, &complexityOpts.OutputFormat)
+}
+
+func printComplexityStats(results []*complexity.FileStat, out io.Writer, opts *complexity.Options) error {
+	switch opts.OutputFormat {
+	case flag.CSV:
+		complexity.PrintCSV(results, out)
+	case flag.Tabular:
+		complexity.PrintTabular(results, out)
+	default:
+		return fmt.Errorf("unsupported output format: %s", opts.OutputFormat)
+	}
+
+	return nil
 }

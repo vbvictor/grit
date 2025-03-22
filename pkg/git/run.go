@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/spf13/pflag"
-	"github.com/vbvictor/grit/grit/cmd/flag"
 	"golang.org/x/exp/maps"
 )
 
@@ -74,6 +73,16 @@ type ChurnChunk struct {
 	Commits int    `json:"commits"`
 }
 
+func getExtMap(extensions []string) map[string]struct{} {
+	extMap := make(map[string]struct{})
+
+	for _, ext := range extensions {
+		extMap[ext] = struct{}{}
+	}
+
+	return extMap
+}
+
 func PopulateOpts(opts *ChurnOptions, extensionList []string,
 	since string,
 	until string,
@@ -91,7 +100,7 @@ func PopulateOpts(opts *ChurnOptions, extensionList []string,
 	}
 
 	if extensionList != nil {
-		opts.Extensions = flag.GetExtMap(extensionList)
+		opts.Extensions = getExtMap(extensionList)
 	}
 
 	if excludeRegex != "" {
@@ -137,9 +146,9 @@ func setUntilOpt(opts *ChurnOptions, until string) error {
 }
 
 func ReadGitChurn(repoPath string, opts *ChurnOptions) ([]*ChurnChunk, error) {
-	cmd := buildGitCommand(repoPath, opts)
+	cmd := buildGitCommand(opts)
 
-	output, err := executeGitCommand(cmd, repoPath)
+	output, err := executeGitCommand(repoPath, cmd)
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +161,7 @@ func ReadGitChurn(repoPath string, opts *ChurnOptions) ([]*ChurnChunk, error) {
 	return maps.Values(fileStats), nil
 }
 
-func buildGitCommand(repoPath string, opts *ChurnOptions) []string {
+func buildGitCommand(opts *ChurnOptions) []string {
 	cmd := []string{"git", "log", "--pretty=format:%H", "--numstat"}
 
 	if !opts.Since.IsZero() {
@@ -163,14 +172,14 @@ func buildGitCommand(repoPath string, opts *ChurnOptions) []string {
 		cmd = append(cmd, "--until="+opts.Until.Format(time.DateOnly))
 	}
 
-	cmd = append(cmd, "--", repoPath)
+	cmd = append(cmd, "--", ".")
 
 	return cmd
 }
 
-func executeGitCommand(cmd []string, repoPath string) ([]byte, error) {
+func executeGitCommand(path string, cmd []string) ([]byte, error) {
 	gitCmd := exec.Command(cmd[0], cmd[1:]...) //nolint:gosec // This command is built via buildGitCommand
-	gitCmd.Dir = repoPath
+	gitCmd.Dir = path
 
 	output, err := gitCmd.Output()
 	if err != nil {
@@ -203,12 +212,14 @@ func processCommit(currentCommit string, modifiedInCommit map[string]bool, fileS
 	opts *ChurnOptions,
 ) {
 	if currentCommit != "" && len(modifiedInCommit) > 0 {
-		for filepath := range modifiedInCommit {
-			if shouldSkipFile(filepath, opts) {
+		for file := range modifiedInCommit {
+			path := file
+
+			if shouldSkipFile(path, opts) {
 				continue
 			}
 
-			fileStats[filepath].Commits++
+			fileStats[path].Commits++
 		}
 	}
 }
@@ -221,7 +232,7 @@ func processFileLine(line string, fileStats map[string]*ChurnChunk, modifiedInCo
 		additions, _ := strconv.Atoi(parts[0])
 		deletions, _ := strconv.Atoi(parts[1])
 
-		path := parts[2]
+		path := localizeClean(parts[2])
 
 		if shouldSkipFile(path, opts) {
 			return
@@ -293,4 +304,13 @@ func SortAndLimit(result []*ChurnChunk, sortBy ChurnType, limit int) []*ChurnChu
 	}
 
 	return result
+}
+
+func localizeClean(path string) string {
+	localized, err := filepath.Localize(path)
+	if err != nil {
+		panic("failed top localize path " + path)
+	}
+
+	return filepath.Clean(localized)
 }

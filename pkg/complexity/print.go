@@ -2,26 +2,11 @@ package complexity
 
 import (
 	"encoding/csv"
-	"fmt"
 	"io"
 	"strconv"
 
 	"github.com/bndr/gotabulate"
-	"github.com/vbvictor/grit/grit/cmd/flag"
 )
-
-func PrintStats(results []*FileStat, out io.Writer, opts *Options) error {
-	switch opts.OutputFormat {
-	case flag.CSV:
-		PrintCSV(results, out)
-	case flag.Tabular:
-		PrintTabular(results, out)
-	default:
-		return fmt.Errorf("unsupported output format: %s", opts.OutputFormat)
-	}
-
-	return nil
-}
 
 func PrintTabular(results []*FileStat, out io.Writer) {
 	_, _ = io.WriteString(out, "\nCode complexity analysis results:\n")
