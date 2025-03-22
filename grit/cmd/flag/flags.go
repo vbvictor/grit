@@ -68,9 +68,9 @@ const (
 	LongSince        = "since"
 	LongUntil        = "until"
 	LongFormat       = "format"
-	LongEngine       = "engine"
+	LongEngine       = "complexity-engine"
 	LongRunCoverage  = "run-tests"
-	LongFileCoverage = "coverage"
+	LongFileCoverage = "coverage-file"
 
 	// Flag shortcuts.
 	ShortTop          = "t"

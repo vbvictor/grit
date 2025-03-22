@@ -91,3 +91,13 @@ func TestGritBasicFunctionality(t *testing.T) {
 
 	RunGritTests(t, tests)
 }
+
+/*
+func newGritReportValidator(expectedOutputs ...string) OutputValidator {
+	return func(t *testing.T, stdout, _ string) bool {
+		t.Helper()
+
+		return false
+	}
+}
+*/

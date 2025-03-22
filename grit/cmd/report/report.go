@@ -2,6 +2,7 @@ package report
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"time"
@@ -19,6 +20,7 @@ var (
 	top          int
 	since        string
 	until        string
+	outputFormat string
 )
 
 var churnOpts = &git.ChurnOptions{
@@ -104,7 +106,7 @@ var ReportCmd = &cobra.Command{
 		fileScores = report.SortAndLimit(report.CalculateScores(fileScores, reportOpts), top)
 		flag.LogIfVerbose("Got %d file scores\n", len(fileScores))
 
-		return report.PrintStats(fileScores, os.Stdout, reportOpts)
+		return printReport(fileScores, os.Stdout, &reportOpts, outputFormat)
 	},
 }
 
@@ -130,4 +132,18 @@ func init() {
 
 	// Report specific flags
 	flag.PerfectCoverageFlag(flags, &reportOpts.PerfectCoverage)
+	flag.OutputFormatFlag(flags, &outputFormat)
+}
+
+func printReport(results []*report.FileScore, out io.Writer, opts *report.Options, format string) error {
+	switch format {
+	case flag.CSV:
+		report.PrintCSV(results, out, opts)
+	case flag.Tabular:
+		report.PrintTabular(results, out, opts)
+	default:
+		return fmt.Errorf("unsupported output format: %s", format)
+	}
+
+	return nil
 }
