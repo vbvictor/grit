@@ -13,13 +13,15 @@ import (
 // 		You can install it via go install.
 // 		You can download it from https://github.com/vbvictor/grit/releases and place it in your PATH.
 
-func createTempRepo(t *testing.T) (tempPath, gritPath string) {
+func createTempRepo(t *testing.T) (string, string) { //nolint
 	t.Helper()
 
 	tempDir := t.TempDir()
 	gritDir := filepath.Join(tempDir, "grit")
 	err := os.MkdirAll(gritDir, 0o755)
 	require.NoError(t, err)
+
+	Unbundle(t, filepath.Join("..", "testdata", "bundles", "grit-test.bundle"), gritDir)
 
 	return tempDir, gritDir
 }
@@ -91,13 +93,3 @@ func TestGritBasicFunctionality(t *testing.T) {
 
 	RunGritTests(t, tests)
 }
-
-/*
-func newGritReportValidator(expectedOutputs ...string) OutputValidator {
-	return func(t *testing.T, stdout, _ string) bool {
-		t.Helper()
-
-		return false
-	}
-}
-*/

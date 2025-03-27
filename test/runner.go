@@ -39,7 +39,6 @@ func NewContainsValidator(expectedOutputs ...string) OutputValidator {
 	}
 }
 
-// RunGritTest runs a single grit test.
 func RunGritTest(t *testing.T, test GritTest) {
 	t.Helper()
 	t.Run(test.Name, func(t *testing.T) {
@@ -79,7 +78,6 @@ func RunGritTest(t *testing.T, test GritTest) {
 
 // findGritExecutable tries to find the grit executable in common locations.
 func findGritExecutable() (string, error) {
-	// Check if grit is in PATH
 	if path, err := exec.LookPath("grit"); err == nil {
 		return path, nil
 	}
@@ -87,7 +85,6 @@ func findGritExecutable() (string, error) {
 	return "", errors.New("could not find grit executable")
 }
 
-// RunGritTests runs multiple grit tests.
 func RunGritTests(t *testing.T, tests []GritTest) {
 	t.Helper()
 
