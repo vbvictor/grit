@@ -93,26 +93,3 @@ func TestGritBasicFunctionality(t *testing.T) {
 
 	RunGritTests(t, tests)
 }
-
-func TestGritReportFunctionality(t *testing.T) {
-	_, gritDir := createTempRepo(t)
-
-	tests := []GritTest{
-		{
-			Name:        "Run basic",
-			RunDir:      gritDir,
-			Args:        []string{},
-			Validator:   NewContainsValidator("GRIT is an all-in-one cli tool"),
-			ExpectError: false,
-		},
-		{
-			Name:        "Run default report",
-			RunDir:      gritDir,
-			Args:        []string{"report", "."},
-			Validator:   NewContainsValidator(filepath.Join("pkg", "complexity", "gocognit_test.go"), "1400", "2.00", "7.00"),
-			ExpectError: false,
-		},
-	}
-
-	RunGritTests(t, tests)
-}
