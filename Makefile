@@ -1,6 +1,6 @@
 .PHONY: all build test clean lint vet fmt run
 
-all: build lint test install
+all: build lint install test
 
 grit:
 	go build -o grit ./grit

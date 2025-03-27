@@ -13,13 +13,15 @@ import (
 // 		You can install it via go install.
 // 		You can download it from https://github.com/vbvictor/grit/releases and place it in your PATH.
 
-func createTempRepo(t *testing.T) (tempPath, gritPath string) {
+func createTempRepo(t *testing.T) (string, string) { //nolint
 	t.Helper()
 
 	tempDir := t.TempDir()
 	gritDir := filepath.Join(tempDir, "grit")
 	err := os.MkdirAll(gritDir, 0o755)
 	require.NoError(t, err)
+
+	Unbundle(t, filepath.Join("..", "testdata", "bundles", "grit-test.bundle"), gritDir)
 
 	return tempDir, gritDir
 }
@@ -92,12 +94,25 @@ func TestGritBasicFunctionality(t *testing.T) {
 	RunGritTests(t, tests)
 }
 
-/*
-func newGritReportValidator(expectedOutputs ...string) OutputValidator {
-	return func(t *testing.T, stdout, _ string) bool {
-		t.Helper()
+func TestGritReportFunctionality(t *testing.T) {
+	_, gritDir := createTempRepo(t)
 
-		return false
+	tests := []GritTest{
+		{
+			Name:        "Run basic",
+			RunDir:      gritDir,
+			Args:        []string{},
+			Validator:   NewContainsValidator("GRIT is an all-in-one cli tool"),
+			ExpectError: false,
+		},
+		{
+			Name:        "Run default report",
+			RunDir:      gritDir,
+			Args:        []string{"report", "."},
+			Validator:   NewContainsValidator(filepath.Join("pkg", "complexity", "gocognit_test.go"), "1400", "2.00", "7.00"),
+			ExpectError: false,
+		},
 	}
+
+	RunGritTests(t, tests)
 }
-*/

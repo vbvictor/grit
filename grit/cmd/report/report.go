@@ -79,6 +79,13 @@ var ReportCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("error getting churn metrics: %w", err)
 		}
+
+		if churnOpts.SortBy == git.Commits {
+			for _, churn := range churns {
+				churn.Churn = churn.Commits
+			}
+		}
+
 		flag.LogIfVerbose("Got %d churn files\n", len(churns))
 
 		flag.LogIfVerbose("Analyzing complexity data...\n")
